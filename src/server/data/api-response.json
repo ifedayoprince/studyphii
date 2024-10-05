@@ -1,0 +1,183 @@
+{
+    "title": "CHM 131.2: Advanced Chemistry Study Guide",
+    "difficultyLevel": 8,
+    "motivationalMessage": "Success is the sum of small efforts, repeated day in and day out.",
+    "chapters": [
+        {
+            "title": "Chemical Kinetics",
+            "topics": [
+                {
+                    "name": "Rate of Chemical Reaction",
+                    "overview": "Study the speed at which reactants are converted into products in a chemical reaction. Understand factors that affect reaction rates, such as concentration, temperature, and presence of a catalyst.",
+                    "learningObjective": "Understand how to calculate and interpret reaction rates and the factors that influence them.",
+                    "comprehensionQuestions": [
+                        "What are the units of reaction rate?",
+                        "How does temperature affect the rate of a chemical reaction?",
+                        "What role does a catalyst play in chemical reactions?"
+                    ],
+                    "videoSearchQueries": [
+                        "Rate of chemical reaction introduction",
+                        "Factors affecting reaction rates",
+                        "Catalysts in chemical reactions"
+                    ],
+                    "tip": "Always note the units when calculating reaction rates; they are crucial to obtaining the correct answer."
+                },
+                {
+                    "name": "Chemical Kinetics: Order of Reaction and Half-Life",
+                    "overview": "Learn about how the order of reaction helps determine rate laws and how half-life measures the time required for half of a reactant to react.",
+                    "learningObjective": "Determine the order of reactions and calculate a reactant's half-life.",
+                    "comprehensionQuestions": [
+                        "How do you determine the order of a reaction?",
+                        "Describe the relationship between half-life and reaction rate."
+                    ],
+                    "videoSearchQueries": [
+                        "Order of reaction explained",
+                        "Calculating reaction half-life"
+                    ],
+                    "tip": "Memorize the formulas for zero, first, and second-order reactions as this will speed up calculations."
+                },
+                {
+                    "name": "Stoichiometry in Reaction Rates",
+                    "overview": "Apply stoichiometric principles to determine reaction rates based on balanced chemical equations.",
+                    "learningObjective": "Use stoichiometry to calculate reactant/product quantities over time.",
+                    "comprehensionQuestions": [
+                        "Why is stoichiometry essential in kinetics?",
+                        "How do stoichiometry coefficients affect reaction rates?"
+                    ],
+                    "videoSearchQueries": [
+                        "Stoichiometry in chemical kinetics",
+                        "Using stoichiometry in rate calculations"
+                    ],
+                    "tip": "Always balance your chemical equations before proceeding with calculations to avoid errors."
+                }
+            ]
+        },
+        {
+            "title": "Chemical Equilibrium",
+            "topics": [
+                {
+                    "name": "Chemical Equilibrium",
+                    "overview": "Understand the dynamic nature of equilibrium in chemical reactions and the forward and reverse reaction rates.",
+                    "learningObjective": "Explain the concept of dynamic equilibrium in chemical reactions.",
+                    "comprehensionQuestions": [
+                        "What defines a state of chemical equilibrium?",
+                        "How do forward and reverse reaction rates compare at equilibrium?"
+                    ],
+                    "videoSearchQueries": [
+                        "Introduction to chemical equilibrium",
+                        "Dynamic nature of chemical equilibrium"
+                    ],
+                    "tip": "Think of equilibrium as a state of balance where both reaction directions occur simultaneously."
+                },
+                {
+                    "name": "Le-Chatelier's Principle",
+                    "overview": "Explore how changes in concentration, temperature, pressure, and catalysts affect the position of equilibrium in a system.",
+                    "learningObjective": "Use Le-Chatelier's Principle to predict the effects of external changes on reaction equilibrium.",
+                    "comprehensionQuestions": [
+                        "Explain how temperature changes affect equilibrium.",
+                        "How does pressure influence gaseous equilibria?"
+                    ],
+                    "videoSearchQueries": [
+                        "Le-Chatelier's Principle",
+                        "Predicting equilibrium shifts"
+                    ],
+                    "tip": "Remember: a system at equilibrium will shift in a direction that relieves any applied stress."
+                }
+            ]
+        },
+        {
+            "title": "Acids and Bases",
+            "topics": [
+                {
+                    "name": "Theories of Acids and Bases",
+                    "overview": "Study the different theories including Arrhenius, Bronsted-Lowry, and Lewis theories on acids and bases.",
+                    "learningObjective": "Differentiate between Arrhenius, Bronsted-Lowry, and Lewis theories of acids and bases.",
+                    "comprehensionQuestions": [
+                        "What distinguishes a Lewis acid from a Bronsted-Lowry acid?",
+                        "How does an Arrhenius acid definition differ from the others?"
+                    ],
+                    "videoSearchQueries": [
+                        "Acid-base theories comparison",
+                        "Lewis vs Bronsted vs Arrhenius acids"
+                    ],
+                    "tip": "Link each theory with its unique concept of acid and base characterization."
+                },
+                {
+                    "name": "Strength of Acids and Bases",
+                    "overview": "Learn about the dissociation of acids/bases in water and what factors determine their strength.",
+                    "learningObjective": "Identify and compare the relative strengths of different acids and bases.",
+                    "comprehensionQuestions": [
+                        "How is acid strength related to dissociation?",
+                        "What are examples of strong and weak acids?"
+                    ],
+                    "videoSearchQueries": [
+                        "Strong vs Weak acids",
+                        "Dissociation of acids and bases"
+                    ],
+                    "tip": "Use the pKa values to quickly assess acid strength; a lower pKa means a stronger acid."
+                },
+                {
+                    "name": "Buffer Solutions",
+                    "overview": "Understand how buffer solutions maintain pH in chemical systems and the application of the Henderson-Hasselbalch equation.",
+                    "learningObjective": "Explain the function of buffer solutions and use the Henderson-Hasselbalch equation.",
+                    "comprehensionQuestions": [
+                        "How do buffers resist changes in pH?",
+                        "Write the Henderson-Hasselbalch equation and explain each component."
+                    ],
+                    "videoSearchQueries": [
+                        "Buffer solutions and pH",
+                        "Henderson-Hasselbalch equation"
+                    ],
+                    "tip": "Remember: Buffers are most effective when pH = pKa."
+                }
+            ]
+        },
+        {
+            "title": "Electrochemistry",
+            "topics": [
+                {
+                    "name": "Balancing Redox Reactions",
+                    "overview": "Learn how to balance redox reactions using the method of half-reactions in aqueous solutions.",
+                    "learningObjective": "Balance redox reactions in acidic and basic solutions using half-reaction method.",
+                    "comprehensionQuestions": [
+                        "Explain the steps in balancing a redox reaction.",
+                        "What is the role of electrons in redox reactions?"
+                    ],
+                    "videoSearchQueries": [
+                        "Balancing redox reactions",
+                        "Half-reaction method in redox"
+                    ],
+                    "tip": "Track electron transfer carefully to ensure both mass and charge are balanced."
+                },
+                {
+                    "name": "Electrochemical Cells and Electrolysis",
+                    "overview": "Study the principles of electrochemical cells, their types, and the process of electrolysis.",
+                    "learningObjective": "Describe the function of electrochemical cells and the process of electrolysis.",
+                    "comprehensionQuestions": [
+                        "How do electrochemical cells generate electricity?",
+                        "What are the differences between galvanic and electrolytic cells?"
+                    ],
+                    "videoSearchQueries": [
+                        "Electrochemical cells and electrolysis",
+                        "Galvanic vs Electrolytic cells"
+                    ],
+                    "tip": "Always remember: in electrochemical cells, oxidation occurs at the anode and reduction at the cathode."
+                },
+                {
+                    "name": "Electrode Potential",
+                    "overview": "Understand electrode potentials and their role in determining cell voltage and electrochemical reactivity.",
+                    "learningObjective": "Use standard electrode potentials to predict reaction spontaneity and cell voltage.",
+                    "comprehensionQuestions": [
+                        "How do you calculate cell potential?",
+                        "What does a positive cell potential indicate?"
+                    ],
+                    "videoSearchQueries": [
+                        "Electrode potential explanation",
+                        "Calculating cell voltage"
+                    ],
+                    "tip": "Use the Nernst equation for precise calculations of cell potential under non-standard conditions."
+                }
+            ]
+        }
+    ]
+}
