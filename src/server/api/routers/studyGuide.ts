@@ -46,7 +46,11 @@ async function searchYouTubeVideos(query: string): Promise<string[]> {
             return data.items.map((item: any) => item.id.videoId);
         }
     } catch (error) {
-        console.error("Error searching YouTube videos:", error);
+        console.log(`Error searching ${query} YouTube videos:`, error);
+        throw new TRPCError({
+            code: 'VIDEO_LOOKUP_ERROR',
+            message: `Error looking up appropriate YouTube videos for query ${query}`,
+        })
     }
 
     return [];
