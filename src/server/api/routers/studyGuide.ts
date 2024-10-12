@@ -43,6 +43,7 @@ async function searchYouTubeVideos(query: string): Promise<string[]> {
         const data = await response.json();
 
         if (data.items && data.items.length > 0) {
+            console.log(data.items)
             return data.items.map((item: any) => item.id.videoId);
         }
     } catch (error) {
@@ -109,15 +110,19 @@ export const studyGuideRouter = createTRPCRouter({
                         const videoIds = await Promise.all(
                             topic.videoSearchQueries.map(query => searchYouTubeVideos(query))
                         );
+                        console.log(videoIds);
                         (topic as any).videos = videoIds.flat().reduce((acc: string[], id) => {
                             if (!uniqueVideoIds.has(id) && acc.length < topic.videoSearchQueries.length) {
+                                console.log(id)
                                 uniqueVideoIds.add(id);
                                 acc.push(id);
                             }
                             return acc;
                         }, []);
+                        console.log(topic)
                     }
                 }
+                console.log(uniqueVideoIds)
 
                 // Store the study guide in the database
                 const storedStudyGuide = await db.studyGuide.create({
