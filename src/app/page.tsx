@@ -18,8 +18,6 @@ import Image from 'next/image'
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
 
-export const dynamic = "force-dynamic";
-
 export default function StudyGuideGenerator() {
   const { toast } = useToast()
   const [courseOutline, setCourseOutline] = useState('')
@@ -46,7 +44,7 @@ export default function StudyGuideGenerator() {
       })
     }
   })
-  const generateStudyGuide = async () => generateGuideMutation.mutate({ courseOutline })
+  const generateStudyGuide = () => generateGuideMutation.mutateAsync({ courseOutline })
 
 
   return (<div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
@@ -165,7 +163,7 @@ const DownloadModal = ({ open, onOpenChange, studyGuideId, setShowFollowUsModal 
       })
       return
     }
-    generatePdfMutation.mutate({ studyGuideId: studyGuideId || "", email }, {
+    generatePdfMutation.mutateAsync({ studyGuideId: studyGuideId || "", email }, { 
       onSuccess: () => {
         onOpenChange(false)
         setShowFollowUsModal(true)
