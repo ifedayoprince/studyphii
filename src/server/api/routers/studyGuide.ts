@@ -48,7 +48,7 @@ async function searchYouTubeVideos(query: string): Promise<string[]> {
     } catch (error) {
         console.log(`Error searching ${query} YouTube videos:`, error);
         throw new TRPCError({
-            code: 'VIDEO_LOOKUP_ERROR',
+            code: 'INTERNAL_SERVER_ERROR',
             message: `Error looking up appropriate YouTube videos for query ${query}`,
         })
     }
