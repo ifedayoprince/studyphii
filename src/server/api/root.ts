@@ -1,4 +1,3 @@
-import { postRouter } from "@/server/api/routers/post";
 import { studyGuideRouter } from "@/server/api/routers/studyGuide";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { pdfRouter } from "@/server/api/routers/pdf";

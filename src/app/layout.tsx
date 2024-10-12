@@ -1,16 +1,44 @@
 import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
-import { type Metadata } from "next";
-
 import { TRPCReactProvider } from "@/trpc/react";
 import Script from "next/script";
+import { Toaster } from "@/components/ui/toaster"
 
-export const metadata: Metadata = {
-  title: "StudyPhii",
-  description: "Build a detailed study guide from your course outline. Complete with YouTube videos, comprehension tests and study tips.",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+
+export const metadata = {
+  title: 'StudyPhii — Study Guide Generator',
+  description: 'StudyPhii is a platform that builds a detailed study guide from your course outline. The guides are complete with YouTube videos, comprehension tests and study tips..',
+  icons: [{ rel: "icon", url: "./favicon.ico" }],
+  openGraph: {
+    url: 'https://study.phii.space',
+    type: 'website',
+    title: 'StudyPhii — Study Guide Generator',
+    description: 'StudyPhii is a platform that builds a detailed study guide from your course outline. The guides are complete with YouTube videos, comprehension tests and study tips.',
+    images: [
+      {
+        url: './og.png',
+        width: 1200,
+        height: 630,
+        alt: 'StudyPhii OpenGraph Image'
+      }
+    ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    domain: 'study.phii.space',
+    url: 'https://study.phii.space',
+    title: 'StudyPhii — Study Guide Generator',
+    description: 'StudyPhii is a platform that builds a detailed study guide from your course outline. The guides are complete with YouTube videos, comprehension tests and study tips.',
+    images: [
+      {
+        url: './og.png',
+        alt: 'StudyPhii Twitter Image'
+      }
+    ]
+  }
 };
+
 
 export default function RootLayout({
   children,
@@ -18,10 +46,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          {children}
+        </TRPCReactProvider>
+        <Toaster />
         <Script
-          src="https://app.lemonsqueezy.com/js/lemon.js"
-          strategy="afterInteractive"
+          src="https://cloud.umami.is/script.js"
+          data-website-id="e5960873-de0f-4c97-ba94-6fd0c953524f"
+          strategy="lazyOnload" // or "afterInteractive" if you prefer
         />
       </body>
     </html>

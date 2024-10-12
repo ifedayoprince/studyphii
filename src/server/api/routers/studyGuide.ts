@@ -30,9 +30,9 @@ const StudyGuideFormat = z.object({
     })),
 });
 
-async function searchYouTubeVideo(query: string): Promise<string | null> {
+async function searchYouTubeVideos(query: string): Promise<string[]> {
     const apiKey = env.YOUTUBE_API_KEY;
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&key=${apiKey}&maxResults=1`;
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&key=${apiKey}&maxResults=3`;
 
     try {
         const response = await fetch(url, {
@@ -43,13 +43,13 @@ async function searchYouTubeVideo(query: string): Promise<string | null> {
         const data = await response.json();
 
         if (data.items && data.items.length > 0) {
-            return data.items[0].id.videoId;
+            return data.items.map((item: any) => item.id.videoId);
         }
     } catch (error) {
-        console.error("Error searching YouTube video:", error);
+        console.error("Error searching YouTube videos:", error);
     }
 
-    return null;
+    return [];
 }
 
 interface TeaserChapter {
@@ -100,13 +100,22 @@ export const studyGuideRouter = createTRPCRouter({
                     throw new Error("Failed to generate study guide")
                 console.log(JSON.stringify(result))
 
+                // Set to keep track of unique video IDs
+                const uniqueVideoIds = new Set<string>();
+
                 // Search for YouTube videos for each topic
                 for (const chapter of result.chapters) {
                     for (const topic of chapter.topics) {
                         const videoIds = await Promise.all(
-                            topic.videoSearchQueries.map(query => searchYouTubeVideo(query))
+                            topic.videoSearchQueries.map(query => searchYouTubeVideos(query))
                         );
-                        (topic as any).videos = videoIds.filter((id): id is string => id !== null);
+                        (topic as any).videos = videoIds.flat().reduce((acc: string[], id) => {
+                            if (!uniqueVideoIds.has(id) && acc.length < topic.videoSearchQueries.length) {
+                                uniqueVideoIds.add(id);
+                                acc.push(id);
+                            }
+                            return acc;
+                        }, []);
                     }
                 }
 
@@ -130,9 +139,9 @@ export const studyGuideRouter = createTRPCRouter({
                                         comprehensionQuestions: topic.comprehensionQuestions,
                                         videoSearchQueries: topic.videoSearchQueries,
                                         videos: {
-                                            create: (topic as any).videos.map((videoId: string) => ({
+                                            create: (topic as any).videos.map((videoId: string, index: number) => ({
                                                 youtubeVideoId: videoId,
-                                                searchQuery: topic.videoSearchQueries[(topic as any).videos.indexOf(videoId)] ?? "",
+                                                searchQuery: topic.videoSearchQueries[index] ?? "",
                                             })),
                                         },
                                         overview: topic.overview,

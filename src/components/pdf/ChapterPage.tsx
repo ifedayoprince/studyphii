@@ -138,11 +138,11 @@ const ChapterPage = ({ chapterData }: any) => {
                             {topic.videos.map((video: any, videoIndex: number) => (
                                 <Link
                                     key={videoIndex}
-                                    src={`https://www.youtube.com/watch?v=${video}`} // Link to the YouTube video
+                                    src={`https://www.youtube.com/watch?v=${video.youtubeVideoId}`} // Link to the YouTube video
                                 >
                                     <Image
                                         style={styles.videoThumbnail}
-                                        src={`https://i.ytimg.com/vi/${video}/hqdefault.jpg`} // Thumbnail image
+                                        src={`https://i.ytimg.com/vi/${video.youtubeVideoId}/hqdefault.jpg`} // Thumbnail image
                                     />
                                 </Link>
                             ))}
