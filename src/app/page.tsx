@@ -28,7 +28,6 @@ export default function StudyGuideGenerator() {
 
   const generateGuideMutation = api.studyGuide.generateStudyGuide.useMutation({
     onSuccess: (data) => {
-      console.log(data)
       setStudyGuideTeaser(data.teaser)
       setStudyGuideId(data.id)
       toast({
