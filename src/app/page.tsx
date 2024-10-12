@@ -56,7 +56,7 @@ export default function StudyGuideGenerator() {
       </Link>
     </header>
 
-    <main className="flex-grow flex items-center justify-center p-8 md:p-12 lg:p-16">
+    <main className="flex-grow flex items-center justify-center p-6 md:p-12 lg:p-16">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center lg:items-start space-y-12 lg:space-y-0 lg:space-x-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -80,7 +80,7 @@ export default function StudyGuideGenerator() {
           className="lg:w-1/2 w-full"
         >
           <Card className="bg-white/80 backdrop-blur-md shadow-2xl rounded-3xl overflow-hidden border-2 border-indigo-100">
-            <CardContent className="p-8 space-y-6">
+            <CardContent className="p-6 md:p-8 space-y-6">
               <div>
                 <label htmlFor="outline" className="block text-lg font-medium text-gray-700 mb-2">Drop your course outline 📚</label>
                 <Textarea
@@ -220,7 +220,7 @@ const FollowUsModal = ({ open, onOpenChange }: { open: boolean, onOpenChange: (o
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-4">
           <p className="text-center text-gray-700 text-lg">
-            Drop us a follow on our socials to stay in the loop and hit us up with your thoughts! 🚀
+            Drop us a follow on our socials to stay in the loop and let us know what can be improved! 🚀
           </p>
           <div className="flex space-x-4">
             <Button
