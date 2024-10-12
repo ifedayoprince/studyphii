@@ -108,7 +108,7 @@ const rateLimitMiddleware = t.middleware(async ({ ctx, next }) => {
     throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
   }
 
-  return next();
+  return await next();
 });
 
 /**
