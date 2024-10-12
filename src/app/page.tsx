@@ -18,6 +18,8 @@ import Image from 'next/image'
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
 
+export const dynamic = "force-dynamic";
+
 export default function StudyGuideGenerator() {
   const { toast } = useToast()
   const [courseOutline, setCourseOutline] = useState('')
