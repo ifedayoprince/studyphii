@@ -8,6 +8,9 @@ dependencies:
   '@auth/prisma-adapter':
     specifier: ^1.6.0
     version: 1.6.0(@prisma/client@5.20.0)
+  '@lemonsqueezy/lemonsqueezy.js':
+    specifier: ^3.3.1
+    version: 3.3.1
   '@prisma/client':
     specifier: ^5.14.0
     version: 5.20.0(prisma@5.20.0)
@@ -326,6 +329,11 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  /@lemonsqueezy/lemonsqueezy.js@3.3.1:
+    resolution: {integrity: sha512-gM/FdNsK3BlrD6JRrhmiyqBXQsCpzSUdKSoZwJMQfXqfqcK321og+uMssc6HYcygUMrGvPnNJyJ1RqZPFDrgtg==}
+    engines: {node: '>=20'}
+    dev: false
 
   /@next/env@14.2.13:
     resolution: {integrity: sha512-s3lh6K8cbW1h5Nga7NNeXrbe0+2jIIYK9YaA9T7IufDWnZpozdFUp6Hf0d5rNWUKu4fEuSX2rCKlGjCrtylfDw==}

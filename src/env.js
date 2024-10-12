@@ -22,6 +22,14 @@ export const env = createEnv({
       // VERCEL_URL doesn't include `https` so it cant be validated as a URL
       process.env.VERCEL ? z.string() : z.string().url()
     ),
+    // New environment variables
+    LEMON_SQUEEZY_API_KEY: z.string(),
+    LEMON_SQUEEZY_WEBHOOK_URL: z.string().url(),
+    LEMON_SQUEEZY_WEBHOOK_SECRET: z.string(),
+    LEMON_SQUEEZY_STORE_ID: z.string(),
+    HOSTED_URL: z.string().url(),
+    YOUTUBE_API_KEY: z.string(),
+    OPENAI_API_KEY: z.string(),
   },
 
   /**
@@ -42,6 +50,14 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    // New environment variables
+    LEMON_SQUEEZY_API_KEY: process.env.LEMON_SQUEEZY_API_KEY,
+    LEMON_SQUEEZY_WEBHOOK_URL: process.env.LEMON_SQUEEZY_WEBHOOK_URL,
+    LEMON_SQUEEZY_WEBHOOK_SECRET: process.env.LEMON_SQUEEZY_WEBHOOK_SECRET,
+    LEMON_SQUEEZY_STORE_ID: process.env.LEMON_SQUEEZY_STORE_ID,
+    HOSTED_URL: process.env.HOSTED_URL,
+    YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

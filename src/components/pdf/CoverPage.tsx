@@ -1,14 +1,15 @@
-import React from 'react';
-import { Document, Page, Text, View, StyleSheet, Font, Link, Svg, Path, Rect } from '@react-pdf/renderer';
+import { Page, Text, View, StyleSheet,  Link, Svg, Path,Font } from '@react-pdf/renderer';
 
-// Register Google Fonts
+
+// Registering fonts globally
 Font.register({
-  family: 'Roboto',
-  fonts: [
-    { src: "http://fonts.gstatic.com/s/roboto/v16/zN7GBFwfMP4uA6AR0HCoLQ.ttf" }, // Roboto Regular
-    { src: "http://fonts.gstatic.com/s/roboto/v16/zN7GBFwfMP4uA6AR0HCoLQ.ttf", fontWeight: 'bold' }, // Roboto Bold
-  ]
+    family: 'Roboto',
+    fonts: [
+        { src: "http://fonts.gstatic.com/s/roboto/v16/zN7GBFwfMP4uA6AR0HCoLQ.ttf" }, // Roboto Regular
+        { src: "http://fonts.gstatic.com/s/roboto/v16/zN7GBFwfMP4uA6AR0HCoLQ.ttf", fontWeight: 'bold' }, // Roboto Bold
+    ]
 });
+Font.registerHyphenationCallback(word => [word]);
 
 // Define styles with adjustments
 const styles = StyleSheet.create({
@@ -118,7 +119,6 @@ const TriangleAccent = () => (
 
 // CoverPage Component
 const CoverPage = ({ data }: any) => (
-  <Document>
     <Page style={styles.page}>
       {/* Decorative borders */}
       <View style={styles.borderTop}></View>
@@ -127,8 +127,8 @@ const CoverPage = ({ data }: any) => (
       {/* App name and URL */}
       <View style={styles.appHeader}>
         <Text style={styles.appName}>StudyPhii</Text>
-        <Link src="https://study.space" style={styles.appLink}>
-          https://study.space
+        <Link src="https://study.phii.space" style={styles.appLink}>
+          https://study.phii.space
         </Link>
       </View>
 
@@ -148,10 +148,6 @@ const CoverPage = ({ data }: any) => (
         "{data.motivationalMessage}"
       </Text>
     </Page>
-  </Document>
 );
 
-// Export the main PDF component
-export default function StudyGuidePDF({ data }: any) {
-  return <CoverPage data={data} />;
-}
+export default CoverPage;

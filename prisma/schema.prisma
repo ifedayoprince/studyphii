@@ -96,8 +96,10 @@ model LemonSqueezyOneTimePayment {
 model StudyGuide {
     id                  String    @id @default(auto()) @map("_id") @db.ObjectId
     courseOutline       String
-    generatedFor        String
-    isDownloaded        String
+    title               String
+    fileName            String
+    generatedFor        String?
+    isDownloaded        Boolean
     motivationalMessage String
     difficultyLevel     Int
     chapters            Chapter[]
@@ -132,7 +134,6 @@ model Topic {
 
 model Video {
     id             String @id @default(auto()) @map("_id") @db.ObjectId
-    title          String
     youtubeVideoId String
     searchQuery    String
 

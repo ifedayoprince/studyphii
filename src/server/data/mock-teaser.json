@@ -1,0 +1,24 @@
+{
+    "teaser": {
+        "title": "CHM 131: Foundations of Chemical Reactions",
+        "chapters": [
+            {
+                "title": "Chapter 1: Rate of Chemical Reaction",
+                "topics": [
+                    "Introduction to Reaction Rates",
+                    "Factors Affecting Reaction Rates"
+                ],
+                "video": "wYqQCojggyM"
+            },
+            {
+                "title": "Chapter 2: Chemical Equilibrium",
+                "topics": [
+                    "Principles of Chemical Equilibrium",
+                    "Le Chatelier's Principle"
+                ],
+                "video": "1GiZzCzmO5Q"
+            }
+        ]
+    },
+    "id": "6702f1c36e65f09fe2a1eee2"
+}

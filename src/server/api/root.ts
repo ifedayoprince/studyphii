@@ -2,6 +2,7 @@ import { postRouter } from "@/server/api/routers/post";
 import { studyGuideRouter } from "@/server/api/routers/studyGuide";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { pdfRouter } from "@/server/api/routers/pdf";
+import { paymentManagementRouter } from "./routers/payment-management";
 
 /**
  * This is the primary router for your server.
@@ -9,8 +10,8 @@ import { pdfRouter } from "@/server/api/routers/pdf";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  post: postRouter,
   studyGuide: studyGuideRouter,
+  paymentManagement: paymentManagementRouter,
   pdf: pdfRouter,
 });
 

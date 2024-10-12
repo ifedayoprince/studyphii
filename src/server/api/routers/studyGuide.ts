@@ -3,13 +3,16 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import OpenAI from "openai";
 import { zodResponseFormat } from 'openai/helpers/zod';
+// import mock from '@/server/data/mock-guide.json';
+import { db } from "@/server/db";
+import { env } from "@/env";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 const TopicFormat = z.object({
-    name: z.string(),
+    name: z.string().describe("The title of the topic only, not prefixed with anything such as 'Topic 1' e.t.c, just the title."),
     overview: z.string(),
     learningObjective: z.string(),
     comprehensionQuestions: z.array(z.string()).describe("Questions that the reader should be able to answer after watching the video."),
@@ -18,14 +21,60 @@ const TopicFormat = z.object({
 })
 const StudyGuideFormat = z.object({
     title: z.string(),
+    filename: z.string().describe("Name of the study guide without the extension"),
     difficultyLevel: z.number().describe("How difficult the course is. 1 is very easy, 10 is very difficult."),
-    motivationalMessage: z.string().describe("A short common saying that should give them the drive to study better."),
+    motivationalMessage: z.string().describe("A short common saying that should give them the drive to study the guide till the end."),
     chapters: z.array(z.object({
-        title: z.string(),
+        title: z.string().describe("The title of the chapter only, not prefixed with anything such as 'Chapter 1' e.t.c, just the title."),
         topics: z.array(TopicFormat),
     })),
 });
 
+async function searchYouTubeVideo(query: string): Promise<string | null> {
+    const apiKey = env.YOUTUBE_API_KEY;
+    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&key=${apiKey}&maxResults=1`;
+
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Referer': env.HOSTED_URL || ""
+            }
+        });
+        const data = await response.json();
+
+        if (data.items && data.items.length > 0) {
+            return data.items[0].id.videoId;
+        }
+    } catch (error) {
+        console.error("Error searching YouTube video:", error);
+    }
+
+    return null;
+}
+
+interface TeaserChapter {
+    title: string;
+    topics: string[];
+    video?: string;
+}
+
+export interface StudyGuideTeaser {
+    title: string;
+    chapters: TeaserChapter[];
+}
+
+function createTeaser(studyGuide: typeof StudyGuideFormat._type): StudyGuideTeaser {
+    const teaserChapters: TeaserChapter[] = studyGuide.chapters.map(chapter => ({
+        title: chapter.title,
+        topics: chapter.topics.map(topic => topic.name),
+        video: (chapter.topics[0] as any).videos[0] ?? undefined,
+    }));
+
+    return {
+        title: studyGuide.title,
+        chapters: teaserChapters,
+    };
+}
 
 export const studyGuideRouter = createTRPCRouter({
     generateStudyGuide: publicProcedure
@@ -47,33 +96,58 @@ export const studyGuideRouter = createTRPCRouter({
                 });
 
                 const result = completion?.choices[0]?.message.parsed
+                if (!result)
+                    throw new Error("Failed to generate study guide")
+                console.log(JSON.stringify(result))
 
-                // // Store the study guide in the database
-                // const createdStudyGuide = await ctx.db.studyGuide.create({
-                //     data: {
-                //         courseOutline,
-                //         guideSections: {
-                //             create: studyGuide.topics.map((topic: any) => ({
-                //                 title: topic.name,
-                //                 content: topic.overview,
-                //                 objective: topic.learningObjective,
-                //             }))
-                //         }
-                //     },
-                //     include: {
-                //         guideSections: true
-                //     }
-                // });
+                // Search for YouTube videos for each topic
+                for (const chapter of result.chapters) {
+                    for (const topic of chapter.topics) {
+                        const videoIds = await Promise.all(
+                            topic.videoSearchQueries.map(query => searchYouTubeVideo(query))
+                        );
+                        (topic as any).videos = videoIds.filter((id): id is string => id !== null);
+                    }
+                }
 
-                // // Return only the first 3 sections
-                // return {
-                //     id: createdStudyGuide.id,
-                //     topics: createdStudyGuide.guideSections.slice(0, 3).map(section => ({
-                //         name: section.title,
-                //         overview: section.content,
-                //         learningObjective: section.objective,
-                //     }))
-                // };
+                // Store the study guide in the database
+                const storedStudyGuide = await db.studyGuide.create({
+                    data: {
+                        courseOutline,
+                        fileName: result.filename,
+                        generatedFor: null,
+                        isDownloaded: false,
+                        title: result.title,
+                        motivationalMessage: result.motivationalMessage,
+                        difficultyLevel: result.difficultyLevel,
+                        chapters: {
+                            create: result.chapters.map(chapter => ({
+                                title: chapter.title,
+                                topics: {
+                                    create: chapter.topics.map(topic => ({
+                                        name: topic.name,
+                                        learningObjective: topic.learningObjective,
+                                        comprehensionQuestions: topic.comprehensionQuestions,
+                                        videoSearchQueries: topic.videoSearchQueries,
+                                        videos: {
+                                            create: (topic as any).videos.map((videoId: string) => ({
+                                                youtubeVideoId: videoId,
+                                                searchQuery: topic.videoSearchQueries[(topic as any).videos.indexOf(videoId)] ?? "",
+                                            })),
+                                        },
+                                        overview: topic.overview,
+                                        tip: topic.tip,
+                                    })),
+                                },
+                            })),
+                        },
+                    },
+                });
+
+                // Create and return the teaser
+                const teaser = createTeaser(result);
+
+                return { teaser, id: storedStudyGuide.id };
 
             } catch (error) {
                 console.error("Error generating study guide:", error);
@@ -82,5 +156,22 @@ export const studyGuideRouter = createTRPCRouter({
                     message: "Failed to generate study guide",
                 });
             }
+        }),
+    checkPaymentStatus: publicProcedure
+        .input(z.object({ studyGuideId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const studyGuide = await ctx.db.studyGuide.findUnique({
+                where: { id: input.studyGuideId },
+                select: { generatedFor: true }
+            })
+
+            if (!studyGuide) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: 'Study guide not found',
+                })
+            }
+
+            return { isPaid: studyGuide.generatedFor !== null }
         }),
 });

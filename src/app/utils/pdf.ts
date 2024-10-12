@@ -1,13 +1,10 @@
-import { api } from "@/trpc/react";
-
 export async function downloadPDF(result: {pdf: string, filename: string}) {
   try {
     const blob = base64ToBlob(result.pdf, "application/pdf");
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.querySelector("#downloadButton") as HTMLAnchorElement;
     a.href = url;
     a.download = result.filename;
-    document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
   } catch (error) {
