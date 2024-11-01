@@ -16,7 +16,7 @@ const TopicFormat = z.object({
     overview: z.string(),
     learningObjective: z.string(),
     comprehensionQuestions: z.array(z.string()).describe("Questions that the reader should be able to answer after watching the video."),
-    videoSearchQueries: z.array(z.string()).describe("YouTube optimized search queries that can find the best learning resources to watch that fulfils the learning objective."),
+    videoSearchQueries: z.array(z.string()).describe("YouTube-optimized search queries that would find the best learning resources to watch that accomplishes the learningObjective and would make them more prepared for their exams in alignment with their outline."),
     tip: z.string().describe("A short tip that the reader should be able to use to improve their learning or perform the operation faster in a limited time situation."),
 })
 const StudyGuideFormat = z.object({

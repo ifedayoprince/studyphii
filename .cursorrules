@@ -1,4 +1,4 @@
-You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI, tRPC, Prisma, Next Auth, Postgres and Tailwind.
+You are an expert in TypeScript, Node.js, Next.js App Router, React, NextUI, tRPC, BlockNote, Prisma, Next Auth, MongoDB and Tailwind.
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.
@@ -22,7 +22,7 @@ You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, 
   - Use declarative JSX.
   
   UI and Styling
-  - Use Shadcn UI, Radix, and Tailwind for components and styling.
+  - Use NextUI, and Tailwind for components and styling.
   - Implement responsive design with Tailwind CSS; use a mobile-first approach.
   
   Performance Optimization
@@ -33,6 +33,7 @@ You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, 
   
   Key Conventions
   - Use 'nuqs' for URL search parameter state management.
+  - Use 'zustand' for global state management
   - Optimize Web Vitals (LCP, CLS, FID).
   - Limit 'use client':
     - Favor server components and Next.js SSR.
@@ -40,12 +41,14 @@ You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, 
     - Avoid for data fetching or state management.
   
   Follow Next.js docs for Data Fetching, Rendering, and Routing.
+  Follow NextUI docs for the component documentations
   
 WHAT WE ARE BUILDING:
-We are building a platform that lets people generate detailed study guide for their courses called StudySpace.
+We are building a platform that helps college students do more with less in their study sessions called StudyPhii
 
 This is the ideas and thoughts we've noted down so far
-- A simple one page site where they can input their course outline and have AI generate a study guide for them complete with recommended youtube videos to watch.
-- They pay a one time fee to download the guide as a pdf and get it sent to their email.
+- Students should be to cater for all their needs on a single platform.
+- It has a Notion-like look. On the left sidebar is their previous study sessions and other pages such as Overview, e.t.c
+- A study session can contain many parts/blocks e.g. Say they want a pomodoro, they can just click the pomodoro button and a pomodoro timer would be added to the session. 
 
-We are using the shadcn component library with the lucide-icons and react-icons packages. The app is a t3 stack project. 
+We are using the NextUI component library with the iconsax and react-icons packages. The app is a t3 stack project. 

@@ -10,18 +10,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String @db.ObjectId
-
-    @@index([name])
-}
-
 // Necessary for Next auth
 model Account {
     id                       String  @id @default(auto()) @map("_id") @db.ObjectId
@@ -30,13 +18,13 @@ model Account {
     provider                 String
     providerAccountId        String
     refresh_token            String?
-    access_token             String?
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String?
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    access_token            String?
+    expires_at              Int?
+    token_type              String?
+    scope                   String?
+    id_token                String?
+    session_state           String?
+    user                    User    @relation(fields: [userId], references: [id])
     refresh_token_expires_in Int?
 
     @@unique([provider, providerAccountId])
@@ -51,14 +39,15 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(auto()) @map("_id") @db.ObjectId
+    id            String         @id @default(auto()) @map("_id") @db.ObjectId
     name          String?
-    email         String?   @unique
+    email         String?        @unique
     emailVerified DateTime?
     image         String?
     accounts      Account[]
     sessions      Session[]
-    posts         Post[]
+    studySessions StudySession[]
+    workspace     Workspace[]
 }
 
 model VerificationToken {
@@ -70,73 +59,37 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
-model LemonSqueezyWebhookEvent {
-    id              String   @id @default(auto()) @map("_id") @db.ObjectId
-    eventName       String
-    processed       Boolean  @default(false)
-    body            Json
-    createdAt       DateTime @default(now())
-    processingError String?
+model Workspace {
+    id          String         @id @default(auto()) @map("_id") @db.ObjectId
+    name        String
+    description String?
+    createdAt   DateTime       @default(now())
+    updatedAt   DateTime       @updatedAt
+    user        User           @relation(fields: [userId], references: [id])
+    userId      String         @db.ObjectId
+    sessions    StudySession[]
 }
 
-model LemonSqueezyOneTimePayment {
-    id             String   @id @default(auto()) @map("_id") @db.ObjectId
-    amount         Float
-    currency       String
-    status         String
-    lemonSqueezyId String   @unique
-    createdAt      DateTime @default(now())
-
-    studyGuide   StudyGuide @relation(fields: [studyGuideId], references: [id])
-    studyGuideId String     @unique @db.ObjectId
-
-    @@map("Payment")
+model StudySession {
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
+    title       String
+    description String?
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    blocks      SessionBlock[]
+    user        User          @relation(fields: [userId], references: [id])
+    userId      String        @db.ObjectId
+    workspace   Workspace     @relation(fields: [workspaceId], references: [id])
+    workspaceId String        @db.ObjectId
 }
 
-model StudyGuide {
-    id                  String    @id @default(auto()) @map("_id") @db.ObjectId
-    courseOutline       String
-    title               String
-    fileName            String
-    generatedFor        String?
-    isDownloaded        Boolean
-    motivationalMessage String
-    difficultyLevel     Int
-    chapters            Chapter[]
-
-    createdAt DateTime @default(now())
-
-    payment LemonSqueezyOneTimePayment?
-}
-
-model Chapter {
-    id     String  @id @default(auto()) @map("_id") @db.ObjectId
-    title  String
-    topics Topic[]
-
-    studyGuide   StudyGuide @relation(fields: [studyGuideId], references: [id])
-    studyGuideId String     @db.ObjectId
-}
-
-model Topic {
-    id                     String   @id @default(auto()) @map("_id") @db.ObjectId
-    name                   String
-    learningObjective      String
-    comprehensionQuestions String[]
-    videoSearchQueries     String[]
-    videos                 Video[]
-    overview               String
-    tip                    String
-
-    chapter   Chapter @relation(fields: [chapterId], references: [id])
-    chapterId String  @db.ObjectId
-}
-
-model Video {
-    id             String @id @default(auto()) @map("_id") @db.ObjectId
-    youtubeVideoId String
-    searchQuery    String
-
-    topic   Topic  @relation(fields: [topicId], references: [id])
-    topicId String @db.ObjectId
+model SessionBlock {
+    id            String       @id @default(auto()) @map("_id") @db.ObjectId
+    type          String      // e.g., "pomodoro", "notes", "flashcards", "todo"
+    content       Json        // Stores block-specific data
+    order         Int         // Position in the session
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+    studySession  StudySession @relation(fields: [sessionId], references: [id])
+    sessionId     String       @db.ObjectId
 }
