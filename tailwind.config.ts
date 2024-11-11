@@ -1,9 +1,14 @@
 import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
+import {nextui} from "@nextui-org/react";
+
 
 export default {
 	darkMode: ["class"],
-	content: ["./src/**/*.tsx"],
+	content: [
+		"./src/**/*.tsx",
+		    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}"
+	],
 	theme: {
 		extend: {
 			fontFamily: {
@@ -80,5 +85,5 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("tailwindcss-animate"), nextui()],
 } satisfies Config;

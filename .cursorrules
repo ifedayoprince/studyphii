@@ -1,4 +1,4 @@
-You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, Radix UI, tRPC, Prisma, Next Auth, Postgres and Tailwind.
+You are an expert in TypeScript, Node.js, Next.js App Router, React, NextUI, Radix UI, tRPC, Prisma, Next Auth, Postgres and Tailwind.
   
   Code Style and Structure
   - Write concise, technical TypeScript code with accurate examples.
@@ -22,7 +22,7 @@ You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, 
   - Use declarative JSX.
   
   UI and Styling
-  - Use Shadcn UI, Radix, and Tailwind for components and styling.
+  - Use NextUI, Radix, and Tailwind for components and styling.
   - Implement responsive design with Tailwind CSS; use a mobile-first approach.
   
   Performance Optimization
@@ -42,10 +42,15 @@ You are an expert in TypeScript, Node.js, Next.js App Router, React, Shadcn UI, 
   Follow Next.js docs for Data Fetching, Rendering, and Routing.
   
 WHAT WE ARE BUILDING:
-We are building a platform that lets people generate detailed study guide for their courses called StudySpace.
+We are building a platform that lets students generate practice questions with AI, interactively answer the questions and ask AI any follow up questions
 
 This is the ideas and thoughts we've noted down so far
-- A simple one page site where they can input their course outline and have AI generate a study guide for them complete with recommended youtube videos to watch.
-- They pay a one time fee to download the guide as a pdf and get it sent to their email.
+- A simple 3 page site, the landing page, the auth page and the actual page where they interact with the application
+- On the blank session page (the actual page they interact), there is an input box where they can type which topic they want questions on, at the top of the box is the large caption "What would you like to learn?". 
+- When they type in and hit go, it generates 3 questions.
+- When they hover a question, if it's an objective question, they get to pick the answer, if it's subjective, an input box appears where they can input their answer, if its a fill in the blanks, they can hover over the blank lines and they are inputs they can fill in the answers.
+- They also get a button by the side of the question card which let's them chat more about that question with the AI to get clarified. there is also a "more like this" button.
+- When they end a session, they see a card that shows how well they did in this session.
+- Once they submit their answer for the last question, the AI automatically generates 4 more.
 
-We are using the shadcn component library with the lucide-icons and react-icons packages. The app is a t3 stack project. 
+We are using the NextUI component library mainly, but shadcn is still installed in case we need something specific from it. Also, we are using the iconsax-react and react-icons packages. The app is a t3 stack project. 

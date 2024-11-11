@@ -23,13 +23,15 @@ export const env = createEnv({
       process.env.VERCEL ? z.string() : z.string().url()
     ),
     // New environment variables
-    LEMON_SQUEEZY_API_KEY: z.string(),
-    LEMON_SQUEEZY_WEBHOOK_URL: z.string().url(),
-    LEMON_SQUEEZY_WEBHOOK_SECRET: z.string(),
-    LEMON_SQUEEZY_STORE_ID: z.string(),
     HOSTED_URL: z.string().url(),
-    YOUTUBE_API_KEY: z.string(),
+    YOUTUBE_API_KEY: z.string().optional(),
     OPENAI_API_KEY: z.string(),
+    GOOGLE_CLIENT_ID: z.string(),
+    GOOGLE_CLIENT_SECRET: z.string(),
+    UPLOADTHING_TOKEN: z.string(),
+    RESEND_API_KEY: z.string(),
+    PAYSTACK_PUBLIC_KEY: z.string(),
+    PAYSTACK_SECRET_KEY: z.string(),
   },
 
   /**
@@ -38,7 +40,7 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_ENV: z.enum(["development", "test", "production"]),
   },
 
   /**
@@ -50,14 +52,16 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    // New environment variables
-    LEMON_SQUEEZY_API_KEY: process.env.LEMON_SQUEEZY_API_KEY,
-    LEMON_SQUEEZY_WEBHOOK_URL: process.env.LEMON_SQUEEZY_WEBHOOK_URL,
-    LEMON_SQUEEZY_WEBHOOK_SECRET: process.env.LEMON_SQUEEZY_WEBHOOK_SECRET,
-    LEMON_SQUEEZY_STORE_ID: process.env.LEMON_SQUEEZY_STORE_ID,
     HOSTED_URL: process.env.HOSTED_URL,
     YOUTUBE_API_KEY: process.env.YOUTUBE_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    PAYSTACK_PUBLIC_KEY: process.env.PAYSTACK_PUBLIC_KEY,
+    PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
+    NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

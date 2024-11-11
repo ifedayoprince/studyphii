@@ -1,0 +1,30 @@
+[
+    {
+        "question": "There are {{slot}} countries in the world",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "There are {{slot}} parts of speech. First of which is {{slot}}",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    }
+]
