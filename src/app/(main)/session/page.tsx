@@ -1,9 +1,9 @@
 "use client"
-import { Session } from "./Session"
+import { NewSession } from "./NewSession"
 
 export default function SessionPage() {
     return <div className="">
-        <Session />
+        <NewSession />
     </div>
 }
 

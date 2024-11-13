@@ -85,5 +85,5 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate"), nextui()],
+	plugins: [require("tailwindcss-animate"), nextui(), require('@tailwindcss/typography')],
 } satisfies Config;
