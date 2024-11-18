@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "katex/dist/katex.min.css";
 
 import { GeistSans } from "geist/font/sans";
 import Script from "next/script";
@@ -6,9 +7,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { Providers } from "./providers";
 import { env } from "@/env";
 
-
 export const metadata = {
-  title: 'StudyPhii — Study Guide Generator',
+  title: 'StudyPhii — AI Learning Platform',
   description: 'StudyPhii is a platform that builds a detailed study guide from your course outline. The guides are complete with YouTube videos, comprehension tests and study tips..',
   icons: [{ rel: "icon", url: "./favicon.ico" }],
   openGraph: {
@@ -45,7 +45,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} dark`}>
+    <html lang="en" className={`${GeistSans.variable} dark`} suppressHydrationWarning>
       <body>
         <Providers>
           {children}

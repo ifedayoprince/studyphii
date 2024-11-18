@@ -44,7 +44,10 @@ export const authOptions: NextAuthOptions = {
         ...session.user,
         id: user.id,
       },
-    }),
+    })
+  },
+  pages: {
+    signIn: "/auth"
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [

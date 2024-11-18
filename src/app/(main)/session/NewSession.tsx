@@ -1,25 +1,101 @@
+"use client";
+
 import { Textarea, Button } from "@nextui-org/react";
 import { ArrowUpIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
+import { api } from "@/trpc/react";
+import { useRouter } from "next/navigation";
 
-export const NewSession = () => {
+export function NewSession() {
     const [input, setInput] = useState("");
+    const router = useRouter();
+    
+    const utils = api.useUtils();
+    const { mutate: createSession, isPending } = api.session.create.useMutation({
+        onSuccess: async(session) => {
+            await utils.session.getHistory.cancel();
+            
+            // Optimistically update the cache
+            utils.session.getHistory.setData(undefined, (old) => {
+                const optimisticSession = {
+                    id: session.id,
+                    title: session.title,
+                    topic: session.topic,
+                    createdAt: session.createdAt,
+                    lastActiveAt: session.lastActiveAt,
+                };
+                
+                if (!old) return [optimisticSession];
+                return [optimisticSession, ...old];
+            });
+            
 
-    const quickStarts = ["Questions on thermodynamics", "Elements in the periodic table", "Integral Calculus"]
-    return <div className="flex max-w-2xl flex-col items-center justify-center gap-5 h-screen w-screen">
-        <h2 className="text-5xl scale-90 text-center font-semibold mb-4">What can I help you learn?</h2>
+            router.push(`/session/${session.id}`);
+        },
+    });
 
-        <div className="relative w-full">
-            <Textarea maxRows={1} height={"100%"} variant="bordered"
-                value={input} onChange={(e) => setInput((e.target.value))}
-                placeholder="Ask StudyPhii a question..."
-                endContent={<Button className="mt-5" disabled={input.trim() == ""} variant={input.trim() == "" ? "flat" : "shadow"} color="primary" isIconOnly><ArrowUpIcon /></Button>} />
+    const handleSubmit = () => {
+        const trimmedInput = input.trim();
+        if (trimmedInput) {
+            createSession({ topic: trimmedInput });
+        }
+    };
 
+    const quickStarts = [
+        "Questions on thermodynamics", 
+        "Elements in the periodic table", 
+        "Integral Calculus"
+    ];
+
+    return (
+        <div className="flex max-w-2xl flex-col items-center justify-center gap-5 h-full w-full pb-16">
+            <h2 className="text-5xl scale-90 text-center font-semibold mb-4">
+                What can I help you learn?
+            </h2>
+
+            <div className="relative w-full">
+                <Textarea 
+                    maxRows={1} 
+                    height={"100%"} 
+                    variant="bordered"
+                    value={input} 
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask StudyPhii a question..."
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSubmit();
+                        }
+                    }}
+                    endContent={
+                        <Button 
+                            className="mt-5" 
+                            disabled={!input.trim() || isPending}
+                            variant={!input.trim() ? "flat" : "shadow"}
+                            color="primary" 
+                            isIconOnly
+                            onClick={handleSubmit}
+                            isLoading={isPending}
+                        >
+                            <ArrowUpIcon />
+                        </Button>
+                    } 
+                />
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-2">
+                {quickStarts.map((quickStart, index) => (
+                    <button
+                        key={index} 
+                        onClick={() => setInput(quickStart)}
+                        className="flex gap-2 items-center rounded-full px-2 py-1 border 
+                                 bg-black/80 hover:bg-black/40 backdrop-blur-sm 
+                                 cursor-pointer text-xs font-medium transition-colors"
+                    >
+                        {quickStart} <ExternalLinkIcon />
+                    </button>
+                ))}
+            </div>
         </div>
-        <div className="flex justify-center gap-2">
-            {quickStarts.map((quickStart, index) => (
-                <p key={index} onClick={() => setInput(quickStart)} className="flex gap-2 items-center rounded-full px-2 py-1 border bg-black/80 hover:bg-black/40 backdrop-blur-sm cursor-pointer text-xs font-medium">{quickStart} <ExternalLinkIcon /></p>
-            ))}
-        </div>
-    </div>
+    );
 }

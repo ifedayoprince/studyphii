@@ -1,93 +1,352 @@
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Radio, RadioGroup, Textarea, Tooltip } from "@nextui-org/react";
-import { DotsHorizontalIcon, DotsVerticalIcon, MagicWandIcon } from "@radix-ui/react-icons";
-import { DiscussModal } from "./DiscussModal";
-import { useState } from "react";
-import { Magicpen } from "iconsax-react";
+import { Button, Radio, RadioGroup, Textarea, Tooltip } from "@nextui-org/react";
+import DiscussModal from "./DiscussModal";
+import { useState, useCallback, useEffect } from "react";
+import { Magicpen, Send2 } from "iconsax-react";
+import { Question as IQuestion, QuestionType } from "@prisma/client";
+import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { api } from "@/trpc/react";
+import useDebounce from "@/hooks/useDebounce";
 
-
-export interface IQuestion {
-    question: string;
-    type: "multiple-choice" | "fill-in-the-blanks" | "subjective";
-    options?: {
-        value: string;
-        key: string;
-        isCorrect: boolean;
-    }[];
-    /*
-    - Multiple choice: index of the correct option
-    - Fill in the blanks: array of the answers filled in
-    - Subjective/Essay: the answer
-    */
-    answer?: number | string[] | string;
+interface QuestionContentProps {
+  content?: string | null;
+  type?: QuestionType;
+  isCorrect: number;
+  userAnswer: string;
+  id: string;
+  onAnswerChange: (answer: string) => void;
 }
 
-export const Question: React.FC<IQuestion & { numbering: number }> = (props) => {
-    const [openDiscussModal, setOpenDiscussModal] = useState(false);
+const QuestionHead: React.FC<QuestionContentProps> = ({
+  content,
+  type,
+  isCorrect,
+  userAnswer,
+  id,
+  onAnswerChange
+}) => {
+  if (!content) return null;
 
-    const QuestionHead = () => {
-        if (props.type == "fill-in-the-blanks") {
-            const parts = props.question.split(" ");
+  if (type == "FILL_IN_BLANKS") {
+    // Split content into segments using regex that matches {{slot}}
+    const regex = /(\s\{\{\s*slot\s*\}\}|\s_{10})/gi
+    const segments = content.split(regex);
 
-            return <div className="text-xl flex gap-x-2 items-center flex-wrap">
-                {parts.map((str, idx) => {
-                    if (str == "{{slot}}") {
-                        return <input className="bg-transparent text-xl py-0 text-gray-400 !outline-none border-b-3 border-gray-700 w-[7rem]" placeholder="" type="text" />
-                    }
-                    return <span className="min-w-max">{str}</span>;
-                })}
-            </div>;
-        }
-        return <h2 className="text-xl">{props.question}</h2>;
-    }
-    const QuestionOptions = () => {
-        if (props.type == "multiple-choice")
-            return <RadioGroup>
-                {props.options?.map((option, i) => <li key={i} className="list-none mb-1">
-                    <Radio value={option.key}><p className="text-lg">{option.value}</p></Radio>
-                </li>)}
-            </RadioGroup>
-        if (props.type == "subjective")
-            return <Textarea className="w-full" minRows={1}
-                placeholder="Answer"
-                classNames={{
-                    input: "text-lg scrollbar-hide"
-                }} variant="faded" />;
+    const calculateWidth = useCallback((value: string, inputElement: HTMLInputElement) => {
+      const span = document.createElement('span');
+      span.style.visibility = 'hidden';
+      span.style.position = 'absolute';
+      span.style.fontSize = window.getComputedStyle(inputElement).fontSize;
+      span.style.fontFamily = window.getComputedStyle(inputElement).fontFamily;
+      span.textContent = value || inputElement.placeholder;
 
-        return null;
-    }
-    return <div className="w-full p-10 py-3 rounded-xl group flex gap-8">
-        <DiscussModal isOpen={openDiscussModal} onClose={() => setOpenDiscussModal(false)} />
-        <h3 className="text-2xl font-medium text-gray-500">{props.numbering}.</h3>
-        <div className="flex flex-col gap-4 w-full">
-            <QuestionHead />
-            <QuestionOptions />
-            <div className="flex gap-4 opacity-0 translate-y-2 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-250">
-                <Tooltip content="Get AI help with this question" delay={1000}>
-                    <Button 
-                        startContent={<Magicpen variant="TwoTone" />} 
-                        onClick={() => setOpenDiscussModal(true)} 
-                        variant="shadow" 
-                        color="success">
-                        Discuss
-                    </Button>
-                </Tooltip>
-                <Tooltip content="Generate similar practice questions" delay={1000}>
-                    <Button startContent={null} variant="light">
-                        More like this
-                    </Button>
-                </Tooltip>
+      document.body.appendChild(span);
+      const width = Math.max(112, span.offsetWidth);
+      inputElement.style.setProperty('--input-width', `${width}px`);
+      document.body.removeChild(span);
+    }, []);
+
+    return (
+      <div className="prose prose-sm dark:prose-invert max-w-none text-xl items-baseline flex flex-wrap gap-2">
+        {segments.map((segment, idx) => {
+          if (regex.test(segment)) {
+            return (
+              <input
+                key={`slot-${id}-${idx}`}
+                ref={(el) => {
+                  if (el && userAnswer) {
+                    calculateWidth(userAnswer, el);
+                  }
+                }}
+                className={`bg-transparent text-xl py-0 !outline-none border-b-3  min-w-[7rem] w-[var(--input-width,7rem)] my-1 ${isCorrect == 1
+                  ? "border-success-400 text-success-400"
+                  : isCorrect == 2
+                    ? "border-danger-400 text-danger-400"
+                    : "border-gray-700 text-gray-400"}`}
+                placeholder=""
+                type="text"
+                value={userAnswer}
+                onChange={(e) => {
+                  const input = e.target;
+                  onAnswerChange(input.value);
+                  calculateWidth(input.value, input);
+                }}
+              />
+            );
+          }
+
+          return (
+            <ReactMarkdown
+              key={`text-${id}-${idx}`}
+              remarkPlugins={[remarkMath, remarkGfm]}
+              rehypePlugins={[rehypeKatex, rehypeRaw]}
+              components={{
+                p: ({ children }) => (
+                  <span className="break-words whitespace-normal inline-block">{children}</span>
+                ),
+              }}
+            >
+              {segment}
+            </ReactMarkdown>
+          );
+        })}
+      </div>
+    );
+  }
+  return (
+    <div className="prose prose-sm dark:prose-invert max-w-none">
+      <ReactMarkdown
+        remarkPlugins={[remarkMath, remarkGfm]}
+        rehypePlugins={[rehypeKatex, rehypeRaw]}
+        components={{
+          p: ({ children }) => (
+            <p className="text-xl mb-2 last:mb-0">{children}</p>
+          ),
+          pre: ({ node, ...props }) => (
+            <div className="overflow-auto rounded-lg bg-default-200 p-2 my-2">
+              <pre {...props} />
             </div>
-        </div>
-        {/* <Dropdown>
-            <DropdownTrigger>
-                <Button isIconOnly variant="light"><DotsHorizontalIcon /></Button>
-            </DropdownTrigger>
-            <DropdownMenu aria-label="Actions" variant="faded">
-                <DropdownItem key="more">More like this</DropdownItem>
-                <DropdownItem key="report" className="text-danger" color="danger">
-                    Report
-                </DropdownItem>
-            </DropdownMenu>
-        </Dropdown> */}
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
+  );
+}
+
+interface QuestionOptionsProps extends QuestionContentProps {
+  options?: string[] | null;
+  isValidating?: boolean;
+  onSubmit?: () => void;
+}
+
+const QuestionOptions: React.FC<QuestionOptionsProps> = ({
+  type,
+  isCorrect,
+  userAnswer,
+  options,
+  id,
+  onAnswerChange,
+  isValidating,
+  onSubmit
+}) => {
+  if (type == "MULTIPLE_CHOICE")
+    return <RadioGroup
+      color={isCorrect == 1 ? "success" : isCorrect == 2 ? "danger" : "default"}
+      value={userAnswer}
+      onChange={(e) => onAnswerChange(e.target.value)}
+    >
+      {options?.map((option, i) => (
+        <li key={`opt-${id}-${i}`} className="list-none mb-1">
+          <Radio value={option.toLowerCase()} className="text-green-700">
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+              <ReactMarkdown
+                remarkPlugins={[remarkMath, remarkGfm]}
+                rehypePlugins={[rehypeKatex, rehypeRaw]}
+                components={{
+                  p: ({ children }) => (
+                    <p className="text-lg mb-0">{children}</p>
+                  ),
+                }}
+              >
+                {option}
+              </ReactMarkdown>
+            </div>
+          </Radio>
+        </li>
+      ))}
+    </RadioGroup>
+  if (type == "SUBJECTIVE")
+    return <Textarea
+      className="w-full"
+      minRows={1}
+      placeholder="Answer"
+      value={userAnswer}
+      onChange={(e) => onAnswerChange(e.target.value)}
+      classNames={{
+        input: "text-lg scrollbar-hide",
+        inputWrapper: `bg-opacity-30 backdrop-blur-md ${isCorrect == 1 ? "border-success-400 text-success-400" : isCorrect == 2 ? "border-danger-400" : ""}`
+      }}
+      variant="faded"
+      endContent={
+        <Button
+          isIconOnly
+          variant="ghost"
+          className="self-end"
+          isLoading={isValidating}
+          onClick={onSubmit}
+        >
+          <Send2 />
+        </Button>
+      }
+    />;
+
+  return null;
+}
+
+export const Question: React.FC<Partial<IQuestion> & {
+  numbering: number,
+  hasDiscussion: boolean
+}> = (props) => {
+  const [openDiscussModal, setOpenDiscussModal] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(props.isCorrect == null ? 0 : props.isCorrect == true ? 1 : 2);
+  const [userAnswer, setUserAnswer] = useState(props.userAnswer);
+  const [isValidating, setIsValidating] = useState(false);
+  const id = props?.id || "";
+
+  const validateSubjectiveMutation = api.questions.validateSubjectiveAnswer.useMutation({
+    onSuccess: (data) => {
+      setIsCorrect(data.isCorrect ? 1 : 2);
+      setIsValidating(false);
+    },
+    onError: (error) => {
+      console.error("Error validating subjective answer:", error);
+      setIsValidating(false);
+    },
+  });
+
+  const updateAnswerMutation = api.questions.updateQuestionAnswer.useMutation();
+
+  const validateAnswer = useCallback(async (answer: string) => {
+    if (!answer) return;
+
+    if (props.type === "SUBJECTIVE") {
+      if (!props.id) return;
+      setIsValidating(true);
+      validateSubjectiveMutation.mutate({
+        questionId: props.id,
+        answer: answer,
+      });
+    } else {
+      // Client-side validation for multiple choice and fill-in-blanks
+      if (!props.answers) return;
+
+      let newIsCorrect = false;
+      switch (props.type) {
+        case "MULTIPLE_CHOICE":
+          const correctIndex = parseInt(props?.answers[0] ?? "0");
+          const selectedIndex = props.options?.findIndex(
+            opt => opt.toLowerCase() === answer.toLowerCase()
+          ) ?? -1;
+          newIsCorrect = selectedIndex === correctIndex;
+          setIsCorrect(newIsCorrect ? 1 : 2);
+          break;
+
+        case "FILL_IN_BLANKS":
+          // Normalize both answers for comparison
+          const normalizedInput = answer.trim().toLowerCase();
+          const normalizedAnswers = props.answers.map(ans => ans.trim().toLowerCase());
+
+          // Check if the input matches any of the possible answers
+          newIsCorrect = normalizedAnswers.some(
+            correctAns => normalizedInput === correctAns
+          );
+          setIsCorrect(newIsCorrect ? 1 : 2);
+          break;
+      }
+
+      // Update the database with the answer
+      if (props.id) {
+        updateAnswerMutation.mutate({
+          questionId: props.id,
+          answer: answer,
+          isCorrect: newIsCorrect,
+        });
+      }
+    }
+  }, [props.type, props.answers, props.options, props.id, validateSubjectiveMutation, updateAnswerMutation]);
+
+  const debouncedValidate = useDebounce(validateAnswer, 1000);
+
+  const handleAnswerChange = (answer: string) => {
+    setUserAnswer(answer);
+    if (props.type !== "SUBJECTIVE") {
+      if (props.type === "MULTIPLE_CHOICE") {
+        // For multiple choice, validate immediately
+        validateAnswer(answer);
+      } else {
+        // For fill-in-blanks, use debounced validation
+        debouncedValidate(answer);
+      }
+    }
+  };
+
+  const handleSubjectiveSubmit = () => {
+    if (!userAnswer) return;
+
+    if (userAnswer.trim()) {
+      validateAnswer(userAnswer);
+    }
+  };
+
+  useEffect(() => {
+    const inputs = document.querySelectorAll(`input[slot-${id}]`);
+    inputs.forEach((input) => {
+      const calculateWidth = (value: string, inputElement: HTMLInputElement) => {
+        const span = document.createElement('span');
+        span.style.visibility = 'hidden';
+        span.style.position = 'absolute';
+        span.style.fontSize = window.getComputedStyle(inputElement).fontSize;
+        span.style.fontFamily = window.getComputedStyle(inputElement).fontFamily;
+        span.textContent = value || inputElement.placeholder;
+
+        document.body.appendChild(span);
+        const width = Math.max(112, span.offsetWidth);
+        inputElement.style.setProperty('--input-width', `${width}px`);
+        document.body.removeChild(span);
+      };
+      calculateWidth(userAnswer || "", input as HTMLInputElement);
+    });
+  }, [userAnswer, id]);
+
+  return <div className="w-full p-10 py-3 rounded-xl group flex gap-8">
+    <DiscussModal questionId={props?.id || ""} hasHistory={props.hasDiscussion} isOpen={openDiscussModal} onClose={() => setOpenDiscussModal(false)} />
+    <h3 className="text-2xl font-medium text-gray-500">{props.numbering}.</h3>
+    <div className="flex flex-col gap-4 w-full">
+      <QuestionHead
+        content={props.content}
+        type={props.type}
+        isCorrect={isCorrect}
+        userAnswer={userAnswer || ""}
+        id={id}
+        onAnswerChange={(answer) => {
+          setIsCorrect(0);
+          handleAnswerChange(answer);
+        }}
+      />
+      <QuestionOptions
+        type={props.type}
+        isCorrect={isCorrect}
+        userAnswer={userAnswer || ""}
+        options={props.options}
+        id={id}
+        onAnswerChange={(answer) => {
+          setIsCorrect(0);
+          handleAnswerChange(answer);
+        }}
+        isValidating={isValidating}
+        onSubmit={handleSubjectiveSubmit}
+      />
+      <div className="flex gap-4 opacity-0 translate-y-2 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-250">
+        <Tooltip content="Get AI help with this question" delay={1000}>
+          <Button
+            startContent={<Magicpen variant="TwoTone" />}
+            onClick={() => setOpenDiscussModal(true)}
+            variant="shadow"
+            color="success">
+            Explain
+          </Button>
+        </Tooltip>
+        <Tooltip content="Generate similar practice questions" delay={1000}>
+          <Button startContent={null} variant="light">
+            More like this
+          </Button>
+        </Tooltip>
+      </div>
+    </div>
+  </div>
 }
