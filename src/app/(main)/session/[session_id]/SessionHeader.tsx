@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { SidebarRight } from "iconsax-react";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
+import { useParams } from "next/navigation";
+import { api } from "@/trpc/react";
 
 interface SessionHeaderProps {
     onOpenSidebar: () => void;
@@ -18,12 +20,25 @@ interface SessionHeaderProps {
 export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: SessionHeaderProps) => {
     const { data } = useSession();
     const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
+    const [topicModalContent, setTopicModalContent] = useState("");
     const [isEndModalOpen, setIsEndModalOpen] = useState(false);
     const router = useRouter();
+    const params = useParams();
+    const sessionId = params.session_id as string;
+    const [isGenerating, setIsGenerating] = useState(false);
+    const generateQuestions = api.questions.generateMoreQuestions.useMutation();
 
-    const handleNewTopic = (topic: string) => {
-        // TODO: Implement topic generation logic
-        console.log("Generating questions for:", topic);
+    const handleRefinePrompt = async (topic: string) => {
+        setIsGenerating(true);
+        try {
+            const res = await generateQuestions.mutateAsync({
+                sessionId,
+                refinePrompt: topic
+            });
+            setTopicModalContent(res.refinePrompt)
+        } finally {
+            setIsGenerating(false);
+        }
     };
 
     const handleEndSession = () => {
@@ -64,8 +79,9 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
                             variant="shadow"
                             color="primary"
                             onClick={() => setIsTopicModalOpen(true)}
+                            isLoading={isGenerating}
                         >
-                            New Topic
+                            Refine
                         </Button>
                         <Button
                             variant="light"
@@ -84,8 +100,9 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
 
             <TopicModal
                 isOpen={isTopicModalOpen}
+                prompt={topicModalContent}
                 onClose={() => setIsTopicModalOpen(false)}
-                onSubmit={handleNewTopic}
+                onSubmit={handleRefinePrompt}
             />
 
             <EndSessionModal

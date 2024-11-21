@@ -7,10 +7,11 @@ interface TopicModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (topic: string) => void;
+    prompt: string;
 }
 
-export function TopicModal({ isOpen, onClose, onSubmit }: TopicModalProps) {
-    const [topic, setTopic] = useState("");
+export function TopicModal({ isOpen, onClose, onSubmit, prompt }: TopicModalProps) {
+    const [topic, setTopic] = useState(prompt);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="2xl">
@@ -18,7 +19,7 @@ export function TopicModal({ isOpen, onClose, onSubmit }: TopicModalProps) {
                 {(onClose) => (
                     <>
                         <ModalHeader className="flex flex-col gap-1 text-2xl">
-                            What would you like to learn?
+                            What would you like to improve?
                         </ModalHeader>
                         <ModalBody>
                             <Textarea

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { generateAIResponse, isAnswerCorrect } from "../utils/openai";
+import { isAnswerCorrect, generateSessionContent } from "../utils/openai";
 import { QuestionType } from "@prisma/client";
 
 export const questionsRouter = createTRPCRouter({
@@ -12,6 +12,9 @@ export const questionsRouter = createTRPCRouter({
       const questions = await ctx.db.question.findMany({
         where: {
           sessionId: input.sessionId,
+        },
+        orderBy: {
+          createdAt: 'asc',
         },
         select: {
           id: true,
@@ -28,11 +31,21 @@ export const questionsRouter = createTRPCRouter({
           }
         }
       });
+      const session = await ctx.db.studySession.findUnique({
+        where: { id: input.sessionId },
+        select: {
+          refinePrompt: true
+        }
+      })
 
-      return questions.map(question => ({
+      const formattedQuestions = questions.map(question => ({
         ...question,
         hasDiscussion: question.discussion.length > 0
       }));
+      return {
+        refinePrompt: session?.refinePrompt,
+        questions: formattedQuestions
+      }
     }),
 
   validateSubjectiveAnswer: protectedProcedure
@@ -95,5 +108,80 @@ export const questionsRouter = createTRPCRouter({
           answeredAt: new Date(),
         },
       });
+    }),
+
+  generateMoreQuestions: protectedProcedure
+    .input(z.object({
+      sessionId: z.string(),
+      referenceQuestionId: z.string().optional(),
+      refinePrompt: z.string().optional()
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Get the session to access the topic
+      const session = await ctx.db.studySession.findUnique({
+        where: { id: input.sessionId },
+        select: {
+          topic: true,
+          refinePrompt: true,
+          questions: {
+            take: 20
+          }
+        }
+      });
+      if (!session)
+        throw new Error("Session not found");
+
+      let question = null;
+      if (input.referenceQuestionId) {
+        question = await ctx.db.question.findUnique({
+          where: { id: input.referenceQuestionId },
+          select: {
+            content: true,
+            type: true
+          }
+        })
+      }
+
+
+      let refinePrompt: string | null = session.refinePrompt ?? null;
+      if (input.refinePrompt) {
+        refinePrompt = (session.refinePrompt
+          ? "\n" : "") + input.refinePrompt
+      } else if (question) {
+        refinePrompt =
+          `Generate 3 more questions like the one below:
+
+${question.content}
+`
+      }
+
+
+      // Generate new questions using AI with existing questions as context
+      const content = await generateSessionContent(session.topic, session.questions, 3, refinePrompt ?? undefined);
+
+      if (!content?.questions.length)
+        throw new Error("Failed to generate new questions");
+
+      // Add the new questions to the session
+      let updatedSession = await ctx.db.studySession.update({
+        where: { id: input.sessionId },
+        data: {
+          refinePrompt: refinePrompt ?? undefined,
+          questions: {
+            create: content.questions.map(q => ({
+              type: q.type,
+              content: q.content,
+              options: q.options ?? [],
+              answers: q.answers
+            })),
+          },
+          lastActiveAt: new Date(),
+        },
+      });
+
+      return {
+        success: true,
+        refinePrompt: updatedSession.refinePrompt || ""
+      };
     }),
 });

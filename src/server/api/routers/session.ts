@@ -32,7 +32,7 @@ export const sessionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         // Generate session content using AI
-        const content = await generateSessionContent(input.topic , []);
+        const content = await generateSessionContent(input.topic , [], 10);
 
         // Create the session
         const session = await ctx.db.studySession.create({

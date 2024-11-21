@@ -65,6 +65,7 @@ model StudySession {
     id           String    @id @default(auto()) @map("_id") @db.ObjectId
     title        String
     topic        String
+    refinePrompt String?
     createdAt    DateTime  @default(now())
     lastActiveAt DateTime?
 
@@ -75,10 +76,10 @@ model StudySession {
 }
 
 model Question {
-    id        String       @id @default(auto()) @map("_id") @db.ObjectId
-    type      QuestionType
-    content   String
-    createdAt DateTime     @default(now())
+    id         String       @id @default(auto()) @map("_id") @db.ObjectId
+    type       QuestionType
+    content    String
+    createdAt  DateTime     @default(now())
     answeredAt DateTime?
 
     // For multiple choice questions
@@ -102,6 +103,9 @@ model Message {
     content   String
     role      Role     @default(user)
     createdAt DateTime @default(now())
+
+    isAborted Boolean
+    isComplete Boolean
 
     question   Question @relation(fields: [questionId], references: [id])
     questionId String   @db.ObjectId

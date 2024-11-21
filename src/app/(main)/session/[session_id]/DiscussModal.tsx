@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, forwardRef } from "react";
 import { Modal, ModalContent, ModalBody, ModalFooter, Button, Avatar, Textarea, Spinner } from "@nextui-org/react";
-import { Send } from "lucide-react";
+import { Send, Stop } from "iconsax-react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -13,13 +13,13 @@ import { Message } from "@/server/api/routers/messages";
 import { useSession } from "next-auth/react";
 
 interface MessageBubbleProps {
-  message: Message;
+  message: Omit<Message, "role"> & {role: string};
   avatar: string;
 }
 
 const MessageBubble = forwardRef<HTMLDivElement, MessageBubbleProps>(({ message, avatar }, ref) => {
   const isAI = message.role === "studyphii";
-  
+
   return (
     <motion.div
       ref={ref}
@@ -31,16 +31,15 @@ const MessageBubble = forwardRef<HTMLDivElement, MessageBubbleProps>(({ message,
       {isAI && (
         <Avatar
           size="sm"
-          src="/studyphii.png"
-          className="mt-0.5"
+          src="/studyphii-ai.png"
+          className="mt-0.5 p-2"
         />
       )}
       <div
-        className={`${
-          !isAI
+        className={`${!isAI
             ? "bg-gray-700/40 text-primary-foreground max-w-[70%] rounded-full px-3 py-2"
             : "p-3 pt-1 max-w-[80%]"
-        }`}
+          }`}
       >
         <ReactMarkdown
           className="prose prose-sm dark:prose-invert max-w-none"
@@ -74,8 +73,10 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
   const [currentMessage, setCurrentMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const {data} = useSession();
-  
+  const { data } = useSession();
+  const [streamingText, setStreamingText] = useState<string | null>(null)
+  const [abortStream, setAbortStream] = useState(false);
+
   const {
     getQuestionState,
     addMessage,
@@ -90,6 +91,7 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
   const { messages, isTyping, hasStarted } = getQuestionState(questionId);
   const getMessages = api.messages.getMessages.useQuery({ questionId }, { enabled: false });
   const sendMessage = api.messages.sendMessage.useMutation();
+  const stopStreaming = api.messages.stopStreaming.useMutation();
 
   // Initialize question state
   useEffect(() => {
@@ -102,12 +104,13 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
   useEffect(() => {
     if (isOpen && hasHistory && messages.length === 0) {
       setIsLoading(true);
-      
+
       getMessages.refetch().then((result) => {
         if (result.data && result.data.length > 0) {
           setMessages(questionId, result.data);
           setHasStarted(questionId, true);
         }
+        scrollToBottom();
       }).catch((err) => {
         setError(err instanceof Error ? err.message : "Failed to load message history");
       }).finally(() => {
@@ -125,7 +128,7 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
   }, [isOpen, questionId, setIsTyping]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ 
+    messagesEndRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
@@ -137,9 +140,14 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
     }
   }, [isOpen, messages, isTyping]);
 
+  const handleAbortStream = async()=>{
+      setAbortStream(true)
+      await stopStreaming.mutateAsync({ questionId });
+  }
   const handleSendMessage = async () => {
+    setAbortStream(false)
     const trimmedMessage = currentMessage.trim();
-    if (!trimmedMessage || isTyping || isLoading) return;
+    if (!trimmedMessage || isTyping || isLoading || streamingText) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -151,18 +159,44 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
 
     addMessage(questionId, userMessage);
     setCurrentMessage("");
+    setStreamingText("")
     setIsTyping(questionId, true);
-
     try {
-      const response = await sendMessage.mutateAsync({
+      sendMessage.mutate({
         content: trimmedMessage,
         questionId,
-      });
+      }, {
+        onSuccess: async (data) => {
+          try {
+            for await (const val of data) {
+              if(abortStream){
+                console.log("breaking")
+                scrollToBottom();
+                break;
+              }
 
-      addMessage(questionId, response);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send message");
+              if (typeof val === "string")
+                setStreamingText(prev => prev + val);
+              else if (typeof val === "object") {
+                // Clear streaming text and add final message
+                addMessage(questionId, val);
+                setStreamingText(null);
+                setHasStarted(questionId, true);
+              }
+              scrollToBottom();
+            }
+          } catch (err) {
+            console.error("Error processing stream:", err);
+            setError("Failed to process AI response");
+          }
+        },
+        onError: (err) => {
+          console.error("Error sending message:", err);
+          setError(err instanceof Error ? err.message : "Failed to send message");
+        },
+      });
     } finally {
+      setAbortStream(false)
       setIsTyping(questionId, false);
     }
   };
@@ -174,15 +208,15 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
     }
   };
 
-  const displayMessages = messages.length > 0 
-    ? messages 
+  const displayMessages = messages.length > 0
+    ? messages
     : [{
-        id: "initial",
-        content: "How can I help you understand this question better?",
-        role: "studyphii",
-        questionId,
-        createdAt: new Date(),
-      }];
+      id: "initial",
+      content: "How can I help you understand this question better?",
+      role: "studyphii",
+      questionId,
+      createdAt: new Date(),
+    }];
 
   return (
     <Modal
@@ -208,32 +242,51 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
                 ) : (
                   <AnimatePresence mode="popLayout">
                     {displayMessages.map((message) => (
-                      <MessageBubble 
-                        key={message.id} 
-                        message={message} 
+                      <MessageBubble
+                        key={message.id}
+                        message={message}
                         avatar={data?.user?.image || "https://placekitten.com/200/200"}
                       />
                     ))}
-                    {isTyping && (
+                    {(streamingText == "") && (<motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="flex gap-2 items-center"
+                      >
+                        <Avatar
+                          size="sm"
+                          src="/studyphii-ai.png"
+                          className="mt-0.5 p-2"
+                        />
+                        <div className="bg-white/90 rounded-full w-4 h-4 animate-pulse" />
+                        </motion.div>)}
+                    {(streamingText && streamingText.trim() != "") && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="flex items-start gap-2"
+                        className="flex gap-2"
                       >
                         <Avatar
                           size="sm"
-                          src="/studyphii.png"
-                          className="mt-0.5"
+                          src="/studyphii-ai.png"
+                          className="mt-0.5 p-2"
                         />
-                        <div className="bg-default-100 rounded-lg p-3">
-                          typing
+                        <div className="p-3 pt-1 max-w-[80%]">
+                          <ReactMarkdown
+                            className="prose prose-sm dark:prose-invert max-w-none"
+                            remarkPlugins={[remarkMath, remarkGfm]}
+                            rehypePlugins={[rehypeKatex, rehypeRaw]}
+                          >
+                            {streamingText}
+                          </ReactMarkdown>
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 )}
-                <div ref={messagesEndRef} className="h-px" />
+                <div ref={messagesEndRef} />
               </div>
             </ModalBody>
             <ModalFooter className="w-full min-h-max py-2 px-4">
@@ -250,28 +303,27 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
                   minRows={1}
                   maxRows={4}
                   className="flex-1"
-                  isDisabled={isTyping || isLoading}
-                  endContent={ <Button
+                  isDisabled={isLoading}
+                  endContent={<Button
                     isIconOnly
                     color="primary"
                     variant="shadow"
-                    onPress={handleSendMessage}
-                    isDisabled={!currentMessage.trim() || isTyping || isLoading}
-                    isLoading={isLoading || isTyping}
-                    className={`rounded-full relative  transition-transform duration-200 ${
-                      currentMessage.trim() && !isTyping && !isLoading
+                    onClick={streamingText ? handleAbortStream : handleSendMessage}
+                    isDisabled={!currentMessage.trim() && streamingText}
+                    isLoading={isLoading || !!streamingText}
+                    className={`rounded-full relative  transition-transform duration-200 ${currentMessage.trim() && !isTyping && !isLoading
                         ? "hover:scale-105 active:scale-95"
                         : ""
-                    }`}
+                      }`}
                   >
-                    <Send size={20} className={`transition-transform duration-200 ${
-                      currentMessage.trim() && !isTyping && !isLoading
+                   
+                      <Send size={20} className={`transition-transform duration-200 ${currentMessage.trim() && !isTyping && !isLoading
                         ? "hover:translate-x-0.5"
                         : ""
-                    }`} />
+                      }`} />
                   </Button>}
                 />
-               
+
               </div>
             </ModalFooter>
           </>

@@ -31,18 +31,18 @@ export const SessionContentSchema = z.object({
 export type GeneratedQuestion = z.infer<typeof GeneratedQuestionSchema>;
 export type SessionContent = z.infer<typeof SessionContentSchema>;
 
-export async function generateSessionContent(topic: string, pastQuestions: Question[]): Promise<SessionContent | null> {
+export async function generateSessionContent(topic: string, pastQuestions: Question[], questionLength: number, refinePrompt?: string): Promise<SessionContent | null> {
   console.log("generating for", topic)
   const completion = await openai.beta.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: PROMPTS.SESSION_GENERATION.system(),
+        content: PROMPTS.SESSION_GENERATION.system(questionLength),
       },
       {
         role: "user",
-        content: PROMPTS.SESSION_GENERATION.user(topic, pastQuestions),
+        content: PROMPTS.SESSION_GENERATION.user(topic, pastQuestions, refinePrompt),
       },
     ],
     response_format: zodResponseFormat(SessionContentSchema, "session"),
@@ -52,39 +52,6 @@ export async function generateSessionContent(topic: string, pastQuestions: Quest
 
   return completion?.choices[0]?.message.parsed ?? null;
 }
-
-export const generateAIResponse = async (userMessage: string, question: GeneratedQuestion): Promise<string> => {
-  const messages = [
-    {
-      role: "system",
-      content: `You are StudyPhii, an AI tutor helping a student understand and learn. 
-      The student is asking about this question: "${question.content}"
-      ${question.type === "MULTIPLE_CHOICE" ? `It's a multiple choice question with these options: ${question.options.join(", ")}` : ""}
-      ${question.type === "FILL_IN_BLANKS" ? `It's a fill-in-the-blanks question with these answers: ${question.answers.join(", ")}` : ""}
-      ${question.type === "SUBJECTIVE" ? "It's a subjective/open-ended question." : ""}
-      
-      Provide helpful, encouraging guidance without directly giving away the answer. Use examples and analogies to help the student understand the concept better.`
-    },
-    {
-      role: "user",
-      content: userMessage
-    }
-  ];
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [],
-      temperature: 0.7,
-      max_tokens: 500,
-    });
-
-    return completion.choices[0]?.message?.content || "I apologize, but I'm having trouble generating a response. Could you please rephrase your question?";
-  } catch (error) {
-    console.error("Error generating AI response:", error);
-    return "I apologize, but I'm having trouble generating a response right now. Please try again in a moment.";
-  }
-};
 
 export async function isAnswerCorrect(topic: string, answer: string, question: string) {
   const completion = await openai.chat.completions.create({
@@ -107,8 +74,7 @@ export async function isAnswerCorrect(topic: string, answer: string, question: s
   return response === 'CORRECT';
 }
 
-export async function* generateAIChatResponse(question: Question, messages: Message[]) {
-  console.log("Calling")
+export async function* generateAIChatResponse(question: Question, messages: Partial<Message>[]) {
   try {
     const formattedMessages: ChatCompletionMessageParam[] = [
       {
@@ -116,8 +82,8 @@ export async function* generateAIChatResponse(question: Question, messages: Mess
         content: [{ type: "text", text: PROMPTS.AI_CHAT.system(question) }]
       },
       ...messages.map(msg => ({
-        role: msg.role === "user" ? "user" : "assistant",
-        content: [{ type: "text", text: msg.content }],
+        role: msg?.role === "user" ? "user" : "assistant",
+        content: [{ type: "text", text: msg?.content || "" }],
       }))
     ] as any;
 
@@ -140,9 +106,9 @@ export async function* generateAIChatResponse(question: Question, messages: Mess
       fullContent += content;
     }
 
-    console.log({ fullContent });
+    return fullContent;
   } catch (error) {
     console.error('Error generating AI response:', error);
-    return null;
+    yield "I apologize, but I'm having trouble generating a response. Could you please rephrase your question?"
   }
 }

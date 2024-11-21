@@ -1,8 +1,10 @@
-import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { Role } from "@prisma/client";
 import { generateAIChatResponse } from "../utils/openai";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+
+
 
 const messageSchema = z.object({
   id: z.string(),
@@ -15,41 +17,63 @@ const messageSchema = z.object({
 export type Message = z.infer<typeof messageSchema>;
 
 export const messagesRouter = createTRPCRouter({
-  getMessages: publicProcedure
+  getMessages: protectedProcedure
     .input(z.object({ questionId: z.string() }))
     .query(async ({ ctx, input }) => {
       return await ctx.db.message.findMany({
-        where: { questionId: input.questionId },
-        orderBy: { createdAt: "asc" },
-        take: 20, // Limit to last 20 messages
+        where: {
+          questionId: input.questionId,
+        },
+        orderBy: {
+          createdAt: "asc",
+        },
+        take: 20
       });
     }),
 
-  sendMessage: publicProcedure
+  stopStreaming: protectedProcedure
     .input(z.object({
-      content: z.string(),
       questionId: z.string(),
     }))
-    .mutation(async function* ({ ctx, input }){
+    .mutation(async ({ ctx, input }) => {
+      const message = await ctx.db.message.findFirst({
+        where: {
+          questionId: input.questionId,
+          role: "studyphii",
+          isAborted: false,
+          isComplete: false
+        }
+      })
+      if (!message) return false;
+
+      await ctx.db.message.update({
+        where: {
+          id: message.id
+        },
+        data: {
+          isAborted: true
+        }
+      });
+      return true;
+    }),
+
+  sendMessage: protectedProcedure
+    .input(z.object({ content: z.string(), questionId: z.string() }))
+    .mutation(async function* ({ ctx, input }) {
       // Get previous messages for context
       const previousMessages = await ctx.db.message.findMany({
         where: { questionId: input.questionId },
         orderBy: { createdAt: "desc" },
         take: 20,
       });
+      console.log(previousMessages)
 
-      // Create the user message
-      const userMessage = await ctx.db.message.create({
-        data: {
-          content: input.content,
-          role: "user",
-          questionId: input.questionId,
-        },
-      });
 
       // Get the question for additional context
       const question = await ctx.db.question.findUnique({
-        where: { id: input.questionId },
+        where: {
+          id: input.questionId,
+        },
       });
 
       if (!question) {
@@ -59,25 +83,63 @@ export const messagesRouter = createTRPCRouter({
         });
       }
 
-      // Format messages for OpenAI
-      const aiResponse = yield* generateAIChatResponse(question, [...previousMessages, userMessage]);
+      let fullResponse = "";
+      let failed = false;
 
-      if (!aiResponse) {
+      try {
+        // Format messages for OpenAI
+        for await (const chunk of generateAIChatResponse(question, [...previousMessages, { content: input.content, role: "user" }])) {
+          // Check if message has been aborted
+          // const currentMessage = await ctx.db.message.findUnique({
+          //   where: { id: aiMessage.id }
+          // });
+
+          // if (currentMessage?.isAborted) {
+          //   failed = true;
+          //   console.log("breaking")
+          //   break;
+          // }
+
+          fullResponse += chunk;
+          yield chunk;
+        }
+
+        // Create the user message
+        await ctx.db.message.create({
+          data: {
+            content: input.content,
+            role: "user",
+            questionId: input.questionId,
+            isAborted: false,
+            isComplete: true
+          },
+        });
+
+        const aiMessage = await ctx.db.message.create({
+          data: {
+            content: fullResponse,
+            role: "studyphii",
+            questionId: input.questionId,
+            isAborted: false,
+            isComplete: !failed
+          },
+        });
+
+        yield aiMessage;
+      } catch (error) {
+        await ctx.db.message.create({
+          data: {
+            content: input.content,
+            role: "user",
+            questionId: input.questionId,
+            isAborted: false,
+            isComplete: true
+          },
+        });
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to get AI response',
+          message: 'Error generating response',
         });
       }
-
-      // Create the AI message
-      const aiMessage = await ctx.db.message.create({
-        data: {
-          content: aiResponse,
-          role: Role.studyphii,
-          questionId: input.questionId,
-        },
-      });
-
-      return aiMessage;
     }),
 });
