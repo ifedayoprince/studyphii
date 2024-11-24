@@ -309,7 +309,7 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
                     color="primary"
                     variant="shadow"
                     onClick={streamingText ? handleAbortStream : handleSendMessage}
-                    isDisabled={!currentMessage.trim() && streamingText}
+                    isDisabled={!currentMessage.trim() && !!streamingText}
                     isLoading={isLoading || !!streamingText}
                     className={`rounded-full relative  transition-transform duration-200 ${currentMessage.trim() && !isTyping && !isLoading
                         ? "hover:scale-105 active:scale-95"

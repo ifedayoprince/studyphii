@@ -62,10 +62,10 @@ const QuestionHead: React.FC<QuestionContentProps> = ({
                   }
                 }}
                 className={`bg-transparent text-xl py-0 !outline-none border-b-3  min-w-[7rem] w-[var(--input-width,7rem)] my-1 ${isCorrect == 1
-                  ? "border-success-400 text-success-400"
+                  ? "border-success-600 text-success-600 dark:border-success-400 dark:text-success-400"
                   : isCorrect == 2
-                    ? "border-danger-400 text-danger-400"
-                    : "border-gray-700 text-gray-400"}`}
+                    ? "border-danger-600 text-danger-600 dark:border-danger-400 dark:text-danger-400"
+                    : "border-gray-600 text-gray-500 dark:border-gray-700 dark:text-gray-400"}`}
                 placeholder=""
                 type="text"
                 value={userAnswer}
@@ -136,13 +136,18 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
 }) => {
   if (type == "MULTIPLE_CHOICE")
     return <RadioGroup
-      color={isCorrect == 1 ? "success" : isCorrect == 2 ? "danger" : "default"}
+      color="default"
       value={userAnswer}
       onChange={(e) => onAnswerChange(e.target.value)}
     >
       {options?.map((option, i) => (
         <li key={`opt-${id}-${i}`} className="list-none mb-1">
-          <Radio value={option.toLowerCase()} className="text-green-700">
+          <Radio value={option.toLowerCase()} 
+          classNames={{
+            control: `${(isCorrect == 1 && userAnswer == option.toLowerCase()) ? "!bg-success-600 dark:!bg-success-400" : (isCorrect == 2 && userAnswer == option.toLowerCase()) ? "!bg-danger-600 dark:!bg-danger-400" : "!bg-default-600 dark:!bg-default-400"}`,
+            wrapper: `${(isCorrect == 1 && userAnswer == option.toLowerCase()) ? "!border-success-600 dark:!border-success-400" : (isCorrect == 2 && userAnswer == option.toLowerCase()) ? "!border-danger-600 dark:!border-danger-400" : "!border-default-600 dark:!border-default-400"}`
+          }}
+          >
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <ReactMarkdown
                 remarkPlugins={[remarkMath, remarkGfm]}
@@ -169,7 +174,7 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
       onChange={(e) => onAnswerChange(e.target.value)}
       classNames={{
         input: "text-lg scrollbar-hide",
-        inputWrapper: `bg-opacity-30 backdrop-blur-md ${isCorrect == 1 ? "border-success-400 text-success-400" : isCorrect == 2 ? "border-danger-400" : ""}`
+        inputWrapper: `bg-opacity-50 dark:bg-opacity-30 backdrop-blur-md ${isCorrect == 1 ? "border-success-600 text-success-700 dark:border-success-400 dark:text-success-400" : isCorrect == 2 ? "border-danger-600 dark:border-danger-400" : ""}`
       }}
       variant="faded"
       endContent={

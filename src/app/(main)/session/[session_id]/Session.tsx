@@ -7,6 +7,7 @@ import { QuestionType } from '@prisma/client';
 import { QuestionSkeleton } from './QuestionSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
+import { useGlobalStore } from './globalStore';
 
 const questionVariants = {
     hidden: {
@@ -17,9 +18,9 @@ const questionVariants = {
         opacity: 1,
         y: 0,
         transition: {
-            delay: index * 0.15,
-            duration: 0.5,
-            ease: "easeOut"
+            delay: index * 0.05,
+            duration: 0.3,
+            ease: "easeIn"
         }
     })
 };
@@ -33,6 +34,8 @@ export const Session = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [showGenerateMore, setShowGenerateMore] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    const { setRefinePrompt, setSessionQuestionsRefresher } = useGlobalStore();
 
     const generateQuestions = api.questions.generateMoreQuestions.useMutation({
         onSuccess: () => {
@@ -57,6 +60,15 @@ export const Session = () => {
             return () => scrollElement.removeEventListener('scroll', handleScroll);
         }
     }, []);
+    useEffect(()=>{
+        if(!output) return;
+
+        console.log(output)
+        if (output.refinePrompt) {
+            setRefinePrompt(output.refinePrompt);
+        }
+        setSessionQuestionsRefresher(()=>{refetch()});
+    }, [output])
 
     const handleGenerateMore = async () => {
         setIsGenerating(true);
@@ -110,7 +122,7 @@ export const Session = () => {
                             variant="flat"
                             onPress={handleGenerateMore}
                             isLoading={isGenerating}
-                            className="px-8"
+                            className="px-8 backdrop-blur-lg"
                         >
                             Load More
                         </Button>

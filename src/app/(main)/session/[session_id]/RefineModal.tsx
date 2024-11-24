@@ -1,18 +1,21 @@
 "use client";
 
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea } from "@nextui-org/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-interface TopicModalProps {
+interface RefineModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (topic: string) => void;
     prompt: string;
 }
 
-export function TopicModal({ isOpen, onClose, onSubmit, prompt }: TopicModalProps) {
+export function RefineModal({ isOpen, onClose, onSubmit, prompt }: RefineModalProps) {
     const [topic, setTopic] = useState(prompt);
 
+    useEffect(()=>{
+        console.log("topic", topic)
+    }, [topic])
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="2xl">
             <ModalContent>

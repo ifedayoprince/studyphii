@@ -1,15 +1,18 @@
 "use client";
 
-import { Avatar, Button } from "@nextui-org/react"
-import { useState } from "react";
-import { TopicModal } from "./TopicModal";
+import { Avatar, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab } from "@nextui-org/react"
+import { useState, useEffect } from "react";
+import { RefineModal } from "./RefineModal";
 import { EndSessionModal } from "./EndSessionModal";
 import { useRouter } from "next/navigation";
-import { SidebarRight } from "iconsax-react";
+import { SidebarRight, Moon, Sun, Mobile } from "iconsax-react";
 import { motion } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { api } from "@/trpc/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useGlobalStore } from './globalStore';
+import { useTheme } from "next-themes";
 
 interface SessionHeaderProps {
     onOpenSidebar: () => void;
@@ -19,23 +22,32 @@ interface SessionHeaderProps {
 
 export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: SessionHeaderProps) => {
     const { data } = useSession();
+    const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
     const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
-    const [topicModalContent, setTopicModalContent] = useState("");
     const [isEndModalOpen, setIsEndModalOpen] = useState(false);
     const router = useRouter();
     const params = useParams();
     const sessionId = params.session_id as string;
     const [isGenerating, setIsGenerating] = useState(false);
-    const generateQuestions = api.questions.generateMoreQuestions.useMutation();
+    const { refinePrompt, sessionQuestionsRefresher } = useGlobalStore();
+    const more = api.questions.generateMoreQuestions.useMutation();
+
+    // Prevent hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     const handleRefinePrompt = async (topic: string) => {
         setIsGenerating(true);
         try {
-            const res = await generateQuestions.mutateAsync({
+            await more.mutateAsync({
                 sessionId,
                 refinePrompt: topic
             });
-            setTopicModalContent(res.refinePrompt)
+            sessionQuestionsRefresher();
         } finally {
             setIsGenerating(false);
         }
@@ -70,10 +82,75 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
                     }
                 </div>
                 {newSession
-                    ? <Avatar
-                        size="md"
-                        isBordered as="button"
-                        src={data?.user?.image || "https://placekitten.com/200/200"} />
+                    ? <Dropdown placement="bottom-end">
+                        <DropdownTrigger>
+                            <Avatar
+                                size="md"
+                                isBordered
+                                as="button"
+                                src={data?.user?.image || "https://placekitten.com/200/200"}
+                                className="transition-transform" />
+                        </DropdownTrigger>
+                        <DropdownMenu aria-label="User Actions" variant="flat">
+                            <DropdownItem key="profile" className="h-14 gap-2">
+                                <p className="font-semibold">{data?.user?.name}</p>
+                                <p className="font-normal text-sm text-default-500">{data?.user?.email}</p>
+                            </DropdownItem>
+                            <DropdownItem
+                                key="theme"
+                                className="cursor-default"
+                                as="li"
+                                closeOnSelect={false}
+                            >
+                                <div className="w-full py-1">
+                                    <Tabs
+                                        aria-label="Theme options"
+                                        selectedKey={theme || "system"}
+                                        onSelectionChange={(key) => setTheme(key as string)}
+                                        size="sm"
+                                        color="primary"
+                                        variant="light"
+                                        classNames={{
+                                            tabList: "gap-2 w-full justify-between py-0",
+                                            base: "w-full",
+                                            cursor: "w-full",
+                                            tab: "px-2 h-8",
+                                        }}
+                                    >
+                                        <Tab
+                                            key="light"
+                                            title={
+                                                <div className="flex items-center gap-2">
+                                                    <Sun size={16} />
+                                                </div>
+                                            }
+                                        />
+                                        <Tab
+                                            key="dark"
+                                            title={
+                                                <div className="flex items-center gap-2">
+                                                    <Moon size={16} />
+                                                </div>
+                                            }
+                                        />
+                                        <Tab
+                                            key="system"
+                                            title={
+                                                <div className="flex items-center gap-2">
+                                                    <Mobile size={16} />
+                                                </div>
+                                            }
+                                        />
+                                    </Tabs>
+                                </div>
+                            </DropdownItem>
+                            <DropdownItem key="settings">Settings</DropdownItem>
+                            <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
+                            <DropdownItem key="logout" color="danger" onClick={() => signOut()}>
+                                Log Out
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
                     : <div className="flex gap-3">
                         <Button
                             variant="shadow"
@@ -90,19 +167,84 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
                         >
                             End Session
                         </Button>
-                        <Avatar
-                            size="md"
-                            isBordered as="button"
-                            src={data?.user?.image || "https://placekitten.com/200/200"} />
+                        <Dropdown placement="bottom-end">
+                            <DropdownTrigger>
+                                <Avatar
+                                    size="md"
+                                    isBordered
+                                    as="button"
+                                    src={data?.user?.image || "https://placekitten.com/200/200"}
+                                    className="transition-transform" />
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="User Actions" variant="flat">
+                                <DropdownItem key="profile" className="h-14 gap-2">
+                                    <p className="font-semibold">{data?.user?.name}</p>
+                                    <p className="font-normal text-sm text-default-500">{data?.user?.email}</p>
+                                </DropdownItem>
+                                <DropdownItem
+                                    key="theme"
+                                    className="cursor-default"
+                                    as="li"
+                                    closeOnSelect={false}
+                                >
+                                    <div className="w-full py-1">
+                                        <Tabs
+                                            aria-label="Theme options"
+                                            selectedKey={theme || "system"}
+                                            onSelectionChange={(key) => setTheme(key as string)}
+                                            size="sm"
+                                            color="primary"
+                                            variant="light"
+                                            classNames={{
+                                                tabList: "gap-2 w-full justify-between py-0",
+                                                base: "w-full",
+                                                cursor: "w-full",
+                                                tab: "px-2 h-8",
+                                            }}
+                                        >
+                                            <Tab
+                                                key="light"
+                                                title={
+                                                    <div className="flex items-center gap-2">
+                                                        <Sun size={16} />
+                                                    </div>
+                                                }
+                                            />
+                                            <Tab
+                                                key="dark"
+                                                title={
+                                                    <div className="flex items-center gap-2">
+                                                        <Moon size={16} />
+                                                    </div>
+                                                }
+                                            />
+                                            <Tab
+                                                key="system"
+                                                title={
+                                                    <div className="flex items-center gap-2">
+                                                        <Mobile size={16} />
+                                                    </div>
+                                                }
+                                            />
+                                        </Tabs>
+                                    </div>
+                                </DropdownItem>
+                                <DropdownItem key="settings">Settings</DropdownItem>
+                                <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
+                                <DropdownItem key="logout" color="danger" onClick={() => signOut()}>
+                                    Log Out
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
                     </div>
                 }
             </nav>
 
-            <TopicModal
+            <RefineModal
                 isOpen={isTopicModalOpen}
-                prompt={topicModalContent}
                 onClose={() => setIsTopicModalOpen(false)}
                 onSubmit={handleRefinePrompt}
+                prompt={refinePrompt}
             />
 
             <EndSessionModal

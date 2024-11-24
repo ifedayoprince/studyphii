@@ -7,6 +7,7 @@ import { format, isToday, isYesterday, differenceInDays } from "date-fns"
 import Link from "next/link"
 import { api } from "@/trpc/react"
 import { Spinner } from "@nextui-org/react"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface HistoryItem {
     id: string;
@@ -100,9 +101,9 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
                     </div>
                 ) : hasNoSessions ? (
                     <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-4">
-                        <Book1 
-                            size={32} 
-                            variant="Bulk" 
+                        <Book1
+                            size={32}
+                            variant="Bulk"
                             className="text-foreground-400"
                         />
                         <div className="space-y-2">
@@ -120,31 +121,34 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
                             <p className="text-xs text-foreground-500 font-medium px-2">
                                 {groupName}
                             </p>
-                            {items.map((item) => (
-                                <Link 
-                                    href={`/session/${item.id}`} 
-                                    key={item.id} 
-                                    className="w-full"
-                                >
-                                    <Tooltip 
-                                        content={item.title}
-                                        delay={1000}
-                                        closeDelay={0}
-                                    >
-                                        <Button
-                                            className="w-full justify-between group"
-                                            variant="light"
-                                            size="md"
-                                        >
-                                            <span className="truncate">{item.title}</span>
-                                        </Button>
-                                    </Tooltip>
-                                </Link>
-                            ))}
+                            {items.map((item) => <SessionButton key={item.id} id={item.id} title={item.title} />)}
                         </div>
                     ))
                 )}
             </ScrollShadow>
         </motion.div>
     )
+}
+
+const SessionButton = ({ id, title }: { id: string, title: string }) => {
+    const utils = api.useUtils();
+
+    return <Link
+        href={`/session/${id}`}
+        key={id}
+        className="w-full"
+        onMouseEnter={async () => await utils.questions.getSessionQuestions.prefetch({ sessionId: id })}>
+        <Tooltip
+            content={title}
+            delay={1500}
+            closeDelay={0}
+        >
+            <Button
+                className="w-full justify-between group"
+                variant="light"
+                size="md">
+                <span className="truncate">{title}</span>
+            </Button>
+        </Tooltip>
+    </Link>
 }

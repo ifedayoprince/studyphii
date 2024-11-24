@@ -29,7 +29,6 @@ export function NewSession() {
                 return [optimisticSession, ...old];
             });
             
-
             router.push(`/session/${session.id}`);
         },
     });
@@ -88,9 +87,11 @@ export function NewSession() {
                     <button
                         key={index} 
                         onClick={() => setInput(quickStart)}
-                        className="flex gap-2 items-center rounded-full px-2 py-1 border 
-                                 bg-black/80 hover:bg-black/40 backdrop-blur-sm 
-                                 cursor-pointer text-xs font-medium transition-colors"
+                        className="flex gap-2 items-center rounded-full px-2 py-1 border
+                                bg-white/80 hover:bg-white
+                                dark:bg-black/80 dark:hover:bg-black/40 
+                                backdrop-blur-sm 
+                                cursor-pointer text-xs font-medium transition-colors"
                     >
                         {quickStart} <ExternalLinkIcon />
                     </button>
