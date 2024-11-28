@@ -59,7 +59,10 @@ export default {
 					'3': 'hsl(var(--chart-3))',
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))'
-				}
+				},
+				color1: "#312e81",
+				color2: "#581c87",
+				color3: "#831843",
 			},
 			keyframes: {
 				'accordion-down': {

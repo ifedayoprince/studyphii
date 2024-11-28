@@ -1,0 +1,18 @@
+{
+  "logo": "RocketLaunch",
+  "brand": "StudyPhii",
+  "navbar": "navbar/navbar.json",
+  "hero": "hero/hero.json",
+  "featured": "Featured/featured.json",
+  "problems": "problems/problems.json",
+  "featuresListicle": "features/featuresListicle.json",
+  "about": "about/about.json",
+  "pricing": "pricing/pricing.json",
+  "testimonialsGrid": "testimonialsGrid/testimonialsGrid1.json",
+  "FAQ": "FAQ/faq.json",
+  "cta": "cta/cta.json",
+  "footer": "Footer/footer.json",
+  "stripe": "stripe/stripe.json",
+  "razorpay": "razorpay/razorpay.json",
+  "resend": "resend/resend.json"
+}

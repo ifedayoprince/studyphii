@@ -144,7 +144,6 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
                                     </Tabs>
                                 </div>
                             </DropdownItem>
-                            <DropdownItem key="settings">Settings</DropdownItem>
                             <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
                             <DropdownItem key="logout" color="danger" onClick={() => signOut()}>
                                 Log Out
