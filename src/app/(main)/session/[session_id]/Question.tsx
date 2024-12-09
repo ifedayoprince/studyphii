@@ -1,7 +1,7 @@
-import { Button, Radio, RadioGroup, Textarea, Tooltip } from "@nextui-org/react";
+import { Button, Radio, RadioGroup, Textarea, Tooltip, Accordion, AccordionItem } from "@nextui-org/react";
 import DiscussModal from "./DiscussModal";
 import { useState, useCallback, useEffect } from "react";
-import { Magicpen, Send2 } from "iconsax-react";
+import { Magicpen, Send2, Book1 } from "iconsax-react";
 import { Question as IQuestion, QuestionType } from "@prisma/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -10,6 +10,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { api } from "@/trpc/react";
 import useDebounce from "@/hooks/useDebounce";
+import { toast } from "sonner";
 
 interface QuestionContentProps {
   content?: string | null;
@@ -142,11 +143,11 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
     >
       {options?.map((option, i) => (
         <li key={`opt-${id}-${i}`} className="list-none mb-1">
-          <Radio value={option.toLowerCase()} 
-          classNames={{
-            control: `${(isCorrect == 1 && userAnswer == option.toLowerCase()) ? "!bg-success-600 dark:!bg-success-400" : (isCorrect == 2 && userAnswer == option.toLowerCase()) ? "!bg-danger-600 dark:!bg-danger-400" : "!bg-default-600 dark:!bg-default-400"}`,
-            wrapper: `${(isCorrect == 1 && userAnswer == option.toLowerCase()) ? "!border-success-600 dark:!border-success-400" : (isCorrect == 2 && userAnswer == option.toLowerCase()) ? "!border-danger-600 dark:!border-danger-400" : "!border-default-600 dark:!border-default-400"}`
-          }}
+          <Radio value={option.toLowerCase()}
+            classNames={{
+              control: `${(isCorrect == 1 && userAnswer == option.toLowerCase()) ? "!bg-success-600 dark:!bg-success-400" : (isCorrect == 2 && userAnswer == option.toLowerCase()) ? "!bg-danger-600 dark:!bg-danger-400" : "!bg-default-600 dark:!bg-default-400"}`,
+              wrapper: `${(isCorrect == 1 && userAnswer == option.toLowerCase()) ? "!border-success-600 dark:!border-success-400" : (isCorrect == 2 && userAnswer == option.toLowerCase()) ? "!border-danger-600 dark:!border-danger-400" : "!border-default-600 dark:!border-default-400"}`
+            }}
           >
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <ReactMarkdown
@@ -195,6 +196,8 @@ const QuestionOptions: React.FC<QuestionOptionsProps> = ({
 
 export const Question: React.FC<Partial<IQuestion> & {
   numbering: number,
+  sessionId: string,
+  refreshQuestions: () => Promise<void>,
   hasDiscussion: boolean
 }> = (props) => {
   const [openDiscussModal, setOpenDiscussModal] = useState(false);
@@ -202,10 +205,19 @@ export const Question: React.FC<Partial<IQuestion> & {
   const [userAnswer, setUserAnswer] = useState(props.userAnswer);
   const [isValidating, setIsValidating] = useState(false);
   const id = props?.id || "";
+  const [showExplanation, setShowExplanation] = useState(false);
 
   const validateSubjectiveMutation = api.questions.validateSubjectiveAnswer.useMutation({
     onSuccess: (data) => {
-      setIsCorrect(data.isCorrect ? 1 : 2);
+      setIsCorrect(data.isCorrect == "INCORRECT" ? 2 : 1);
+      if(data.isCorrect == "TRACK") {
+        toast.info("You're on the right track!", {
+          description: "Your answer is close, but could be more precise. Check the explanation for details.",
+          duration: 4000,
+          className: "dark:bg-default-100 dark:text-white",
+        });
+        setShowExplanation(true);
+      }
       setIsValidating(false);
     },
     onError: (error) => {
@@ -214,7 +226,9 @@ export const Question: React.FC<Partial<IQuestion> & {
     },
   });
 
+
   const updateAnswerMutation = api.questions.updateQuestionAnswer.useMutation();
+  const moreQuestionsMutation = api.questions.generateMoreQuestions.useMutation();
 
   const validateAnswer = useCallback(async (answer: string) => {
     if (!answer) return;
@@ -222,7 +236,7 @@ export const Question: React.FC<Partial<IQuestion> & {
     if (props.type === "SUBJECTIVE") {
       if (!props.id) return;
       setIsValidating(true);
-      validateSubjectiveMutation.mutate({
+      validateSubjectiveMutation.mutateAsync({
         questionId: props.id,
         answer: answer,
       });
@@ -269,17 +283,28 @@ export const Question: React.FC<Partial<IQuestion> & {
 
   const handleAnswerChange = (answer: string) => {
     setUserAnswer(answer);
-    if (props.type !== "SUBJECTIVE") {
-      if (props.type === "MULTIPLE_CHOICE") {
+    if (props.type !== "SUBJECTIVE" && props.type === "MULTIPLE_CHOICE") {
         // For multiple choice, validate immediately
         validateAnswer(answer);
       } else {
         // For fill-in-blanks, use debounced validation
         debouncedValidate(answer);
-      }
     }
   };
 
+  const [isGenerating, setIsGenerating] = useState(false);
+  const generateSimilarQuestions = async () => {
+    setIsGenerating(true);
+    try {
+      await moreQuestionsMutation.mutateAsync({
+        sessionId: props.sessionId,
+        referenceQuestionId: props.id
+      });
+      await props.refreshQuestions();
+    } finally {
+      setIsGenerating(false);
+    }
+  }
   const handleSubjectiveSubmit = () => {
     if (!userAnswer) return;
 
@@ -307,6 +332,25 @@ export const Question: React.FC<Partial<IQuestion> & {
       calculateWidth(userAnswer || "", input as HTMLInputElement);
     });
   }, [userAnswer, id]);
+
+  const handleRevealAnswer = () => {
+    if (!props.answers?.length) return;
+
+    let answer = "";
+    switch (props.type) {
+      case "MULTIPLE_CHOICE":
+        const correctIndex = parseInt(props.answers[0] ?? "");
+        answer = (props.options?.[correctIndex] || "").toLowerCase();
+        break;
+      case "FILL_IN_BLANKS":
+      case "SUBJECTIVE":
+        answer = props.answers[0] ?? "";
+        break;
+    }
+
+    handleAnswerChange(answer);
+    setShowExplanation(true);
+  };
 
   return <div className="w-full p-10 py-3 rounded-xl group flex gap-8">
     <DiscussModal questionId={props?.id || ""} hasHistory={props.hasDiscussion} isOpen={openDiscussModal} onClose={() => setOpenDiscussModal(false)} />
@@ -336,21 +380,75 @@ export const Question: React.FC<Partial<IQuestion> & {
         isValidating={isValidating}
         onSubmit={handleSubjectiveSubmit}
       />
-      <div className="flex gap-4 opacity-0 translate-y-2 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-250">
-        <Tooltip content="Get AI help with this question" delay={1000}>
-          <Button
-            startContent={<Magicpen variant="TwoTone" />}
-            onClick={() => setOpenDiscussModal(true)}
-            variant="shadow"
-            color="success">
-            Explain
-          </Button>
-        </Tooltip>
-        <Tooltip content="Generate similar practice questions" delay={1000}>
-          <Button startContent={null} variant="light">
-            More like this
-          </Button>
-        </Tooltip>
+
+      {props.explanation && showExplanation && (
+        <Accordion
+          className="w-full"
+          selectionMode="single"
+          defaultExpandedKeys={["explanation"]}
+        >
+          <AccordionItem
+            key="explanation"
+            aria-label="Explanation"
+            classNames={{
+              base: "border-2 dark:border border-default-200 rounded-xl bg-black/10 dark:bg-white/10  backdrop-blur-md",
+              title: "font-medium",
+              trigger: "px-4 py-2",
+              content: "px-4"
+            }}
+            title={
+              <div className="flex items-center gap-2">
+                <Book1 className="text-success-500" size={20} />
+                <span className="font-medium">Explanation</span>
+              </div>
+            }
+          >
+            <div className="prose prose-sm dark:prose-invert max-w-none py-2">
+              <ReactMarkdown
+                remarkPlugins={[remarkMath, remarkGfm]}
+                rehypePlugins={[rehypeKatex, rehypeRaw]}
+                components={{
+                  p: ({ children }) => (
+                    <p className="text-base mb-2 last:mb-0">{children}</p>
+                  ),
+                }}
+              >
+                {props.explanation}
+              </ReactMarkdown>
+            </div>
+          </AccordionItem>
+        </Accordion>
+      )}
+      <div className="flex justify-between w-full opacity-0 translate-y-2 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-250">
+        <div className="flex gap-4 items-center">
+          <Tooltip content="Get AI help with this question" delay={1000}>
+            <Button
+              startContent={<Magicpen variant="TwoTone" />}
+              onClick={() => setOpenDiscussModal(true)}
+              variant="shadow"
+              color="success">
+              Explain
+            </Button>
+          </Tooltip>
+          <Tooltip content="Generate similar practice questions" delay={1000}>
+            <Button startContent={null} variant="light" size="sm"
+              onClick={generateSimilarQuestions}
+              isLoading={isGenerating}>
+              More like this
+            </Button>
+          </Tooltip>
+        </div>
+        <div className="flex gap-4">
+          <Tooltip content="Reveal the answer to this question" delay={1000}>
+            <Button
+              variant="light"
+              size="sm"
+              onClick={handleRevealAnswer}
+            >
+              Reveal Answer
+            </Button>
+          </Tooltip>
+        </div>
       </div>
     </div>
   </div>

@@ -76,11 +76,12 @@ model StudySession {
 }
 
 model Question {
-    id         String       @id @default(auto()) @map("_id") @db.ObjectId
-    type       QuestionType
-    content    String
-    createdAt  DateTime     @default(now())
-    answeredAt DateTime?
+    id          String       @id @default(auto()) @map("_id") @db.ObjectId
+    type        QuestionType
+    content     String
+    createdAt   DateTime     @default(now())
+    answeredAt  DateTime?
+    explanation String?
 
     // For multiple choice questions
     options    String[] @default([])
@@ -104,7 +105,7 @@ model Message {
     role      Role     @default(user)
     createdAt DateTime @default(now())
 
-    isAborted Boolean
+    isAborted  Boolean
     isComplete Boolean
 
     question   Question @relation(fields: [questionId], references: [id])

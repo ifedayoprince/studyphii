@@ -28,13 +28,6 @@ const MessageBubble = forwardRef<HTMLDivElement, MessageBubbleProps>(({ message,
       exit={{ opacity: 0, y: -20 }}
       className={`flex ${isAI ? "justify-start" : "justify-end"} items-start gap-2`}
     >
-      {isAI && (
-        <Avatar
-          size="sm"
-          src="/studyphii-ai.png"
-          className="mt-0.5 p-2"
-        />
-      )}
       <div
         className={`${!isAI
             ? "bg-gray-700/40 text-primary-foreground max-w-[70%] rounded-full px-3 py-2"

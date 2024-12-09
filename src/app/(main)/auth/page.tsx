@@ -13,8 +13,8 @@ export default function AuthPage() {
                     StudyPhii
                 </Link>
 
-                <main className="flex-1 flex items-center justify-center">
-                    <Card className="w-[400px] bg-background/40 dark:bg-default-100/30 backdrop-blur-md p-8">
+                <main className="flex-1 flex items-center justify-center p-4">
+                    <Card className="w-[90vw] md:w-[400px] bg-background/40 dark:bg-default-100/30 backdrop-blur-md p-4 sm:p-8">
                         <h1 className="text-3xl font-medium mb-8">Sign in</h1>
                         <Button
                             onClick={() => signIn("google", {callbackUrl: "/"})}

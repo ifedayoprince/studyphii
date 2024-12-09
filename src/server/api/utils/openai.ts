@@ -20,12 +20,13 @@ export const GeneratedQuestionSchema = z.object({
   type: QuestionTypeEnum,
   content: z.string().describe("The main question to be displayed to the user. Formulars (if any) should be written in KaTeX format "),
   options: z.array(z.string()).describe("The available options if any. Do not prefix them with any numbering or lettering"),
-  answers: z.array(z.string()).describe("The correct answer(s) to the question. If the question type is fill-in-the-blanks, this should be an array of strings each containing the possible correct answers the user could fill in for the {{slot}}. If the question type is multiple-choice, the first item should be the index of the correct answer in the options array (the index starts at 0)"),
+  answers: z.array(z.string()).describe("The correct answer(s) to the question. If the question type is fill-in-the-blanks, this should be an array of strings each containing the possible correct answers the user could fill in for the {{slot}}. If the question type is multiple-choice, the first item should be the index of the correct answer in the options array (the index starts at 0). If the question is a subjective question, this bean array with the first item being a clear, correct and concise answer to the question asked"),
+  explanation: z.string().describe("An explanation of the answer(s) to the question. This should be a concise and direct explanation of why the answer is correct. It should be no more than 100 words."),
 });
 
 export const SessionContentSchema = z.object({
-  title: z.string().describe("The title of the session to be displayed to the user based on the topic."),
-  questions: z.array(GeneratedQuestionSchema).describe("The array of questions. Generate just one"),
+  title: z.string().describe("The session's title. It should be able to summarize the user's input. Be as concise as possible, yet specific enough. It must be no more than 6 words and no less than 2."),
+  questions: z.array(GeneratedQuestionSchema),
 });
 
 export type GeneratedQuestion = z.infer<typeof GeneratedQuestionSchema>;
@@ -53,17 +54,17 @@ export async function generateSessionContent(topic: string, pastQuestions: Quest
   return completion?.choices[0]?.message.parsed ?? null;
 }
 
-export async function isAnswerCorrect(topic: string, answer: string, question: string) {
+export async function validateAnswerCorrect(answer: string, question: string) {
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: PROMPTS.SUBJECTIVE_ANSWER_VALIDATION.system(topic)
+        content: PROMPTS.SUBJECTIVE_ANSWER_VALIDATION.system(question)
       },
       {
         role: "user",
-        content: PROMPTS.SUBJECTIVE_ANSWER_VALIDATION.user(question, answer)
+        content: PROMPTS.SUBJECTIVE_ANSWER_VALIDATION.user(answer)
       }
     ],
     temperature: 0.3,
@@ -71,7 +72,7 @@ export async function isAnswerCorrect(topic: string, answer: string, question: s
   });
 
   const response = completion.choices[0]?.message?.content?.trim().toUpperCase();
-  return response === 'CORRECT';
+  return (response ?? "INCORRECT") as "CORRECT" | "INCORRECT" |"TRACK";
 }
 
 export async function* generateAIChatResponse(question: Question, messages: Partial<Message>[]) {

@@ -1,7 +1,6 @@
 "use client"
 import React from 'react';
 import { motion } from 'framer-motion';
-import siteConfig from './config/siteConfig.json';
 import featuredInConfig from './config/Featured/featured.json';
 
 

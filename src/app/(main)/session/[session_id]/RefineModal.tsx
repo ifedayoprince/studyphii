@@ -1,21 +1,18 @@
 "use client";
 
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Textarea } from "@nextui-org/react";
-import { useState, useEffect } from "react";
+import { useGlobalStore } from "./globalStore";
 
 interface RefineModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (topic: string) => void;
-    prompt: string;
 }
 
-export function RefineModal({ isOpen, onClose, onSubmit, prompt }: RefineModalProps) {
-    const [topic, setTopic] = useState(prompt);
+export function RefineModal({ isOpen, onClose, onSubmit }: RefineModalProps) {
+    const {refinePrompt, setRefinePrompt} = useGlobalStore();
 
-    useEffect(()=>{
-        console.log("topic", topic)
-    }, [topic])
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="2xl">
             <ModalContent>
@@ -27,8 +24,8 @@ export function RefineModal({ isOpen, onClose, onSubmit, prompt }: RefineModalPr
                         <ModalBody>
                             <Textarea
                                 placeholder="e.g. Quantum mechanics, specifically about wave-particle duality"
-                                value={topic}
-                                onChange={(e) => setTopic(e.target.value)}
+                                value={refinePrompt}
+                                onChange={(e) => setRefinePrompt(e.target.value)}
                                 minRows={4}
                                 size="lg"
                             />
@@ -40,8 +37,8 @@ export function RefineModal({ isOpen, onClose, onSubmit, prompt }: RefineModalPr
                             <Button 
                                 color="primary" 
                                 onPress={() => {
-                                    if (topic.trim()) {
-                                        onSubmit(topic);
+                                    if (refinePrompt.trim()) {
+                                        onSubmit(refinePrompt);
                                         onClose();
                                     }
                                 }}

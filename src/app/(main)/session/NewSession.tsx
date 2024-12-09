@@ -9,12 +9,12 @@ import { useRouter } from "next/navigation";
 export function NewSession() {
     const [input, setInput] = useState("");
     const router = useRouter();
-    
+
     const utils = api.useUtils();
     const { mutate: createSession, isPending } = api.session.create.useMutation({
-        onSuccess: async(session) => {
+        onSuccess: async (session) => {
             await utils.session.getHistory.cancel();
-            
+
             // Optimistically update the cache
             utils.session.getHistory.setData(undefined, (old) => {
                 const optimisticSession = {
@@ -24,11 +24,11 @@ export function NewSession() {
                     createdAt: session.createdAt,
                     lastActiveAt: session.lastActiveAt,
                 };
-                
+
                 if (!old) return [optimisticSession];
                 return [optimisticSession, ...old];
             });
-            
+
             router.push(`/session/${session.id}`);
         },
     });
@@ -41,23 +41,24 @@ export function NewSession() {
     };
 
     const quickStarts = [
-        "Questions on thermodynamics", 
-        "Elements in the periodic table", 
+        "Questions on thermodynamics",
+        "Elements in the periodic table",
         "Integral Calculus"
     ];
 
     return (
         <div className="flex max-w-2xl flex-col items-center justify-center gap-5 h-full w-full pb-16">
-            <h2 className="text-5xl scale-90 text-center font-semibold mb-4">
+            <h2 className="text-4xl md:text-5xl md:scale-90 text-center font-semibold mb-4">
                 What can I help you learn?
             </h2>
 
             <div className="relative w-full">
-                <Textarea 
-                    maxRows={1} 
-                    height={"100%"} 
+                <Textarea
+                    minRows={1}
+                    maxRows={5}
+                    height={"100%"}
                     variant="bordered"
-                    value={input} 
+                    value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask StudyPhii a question..."
                     onKeyDown={(e) => {
@@ -67,25 +68,25 @@ export function NewSession() {
                         }
                     }}
                     endContent={
-                        <Button 
-                            className="mt-5" 
+                        <Button
+                            className="mt-5 self-end"
                             disabled={!input.trim() || isPending}
                             variant={!input.trim() ? "flat" : "shadow"}
-                            color="primary" 
+                            color="primary"
                             isIconOnly
                             onClick={handleSubmit}
                             isLoading={isPending}
                         >
                             <ArrowUpIcon />
                         </Button>
-                    } 
+                    }
                 />
             </div>
 
             <div className="flex flex-wrap justify-center gap-2">
                 {quickStarts.map((quickStart, index) => (
                     <button
-                        key={index} 
+                        key={index}
                         onClick={() => setInput(quickStart)}
                         className="flex gap-2 items-center rounded-full px-2 py-1 border
                                 bg-white/80 hover:bg-white

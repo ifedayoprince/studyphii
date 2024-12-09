@@ -4,14 +4,14 @@ interface IGlobalStore {
     refinePrompt: string;
     setRefinePrompt: (refinePrompt: string) => void;
 
-    sessionQuestionsRefresher: Function;
-    setSessionQuestionsRefresher: (refresher: Function)=> void;
+    sessionQuestionsRefresher: () => Promise<void>;
+    setSessionQuestionsRefresher: (refresher: () => Promise<void>)=> void;
 }
 
 export const useGlobalStore = create<IGlobalStore>((set) => ({
     refinePrompt: "",
     setRefinePrompt: (refinePrompt) => set({ refinePrompt }),
 
-    sessionQuestionsRefresher: ()=>{},
+    sessionQuestionsRefresher: async ()=>{},
     setSessionQuestionsRefresher: (refresher)=> set({sessionQuestionsRefresher: refresher})
 }));

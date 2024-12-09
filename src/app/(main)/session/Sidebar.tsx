@@ -80,7 +80,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             initial={{ width: 0 }}
             animate={{ width: isOpen ? "16rem" : 0 }}
             transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-            className="h-screen grid grid-rows-[max-content,auto] overflow-hidden border-r border-gray-500/10"
+            className="fixed z-50 md:sticky h-screen grid grid-rows-[max-content,auto] overflow-hidden border-r border-gray-500/10 bg-black/10 backdrop-blur-xl md:backdrop-blur-none md:bg-transparent"
         >
             <div className="flex flex-col gap-4 p-4 px-3 mb-6">
                 <div className="flex justify-start">

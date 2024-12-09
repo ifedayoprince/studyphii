@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { isAnswerCorrect, generateSessionContent } from "../utils/openai";
+import { generateSessionContent, validateAnswerCorrect } from "../utils/openai";
 import { QuestionType } from "@prisma/client";
 
 export const questionsRouter = createTRPCRouter({
@@ -22,6 +22,7 @@ export const questionsRouter = createTRPCRouter({
           type: true,
           options: true,
           answers: true,
+          explanation: true,
           userAnswer: true,
           isCorrect: true,
           discussion: {
@@ -56,25 +57,21 @@ export const questionsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Get the question and its associated session
       const question = await ctx.db.question.findFirst({
-        where: { id: input.questionId },
-        include: {
-          session: true // Include the session to get the topic
-        }
+        where: { id: input.questionId }
       });
 
       if (!question || question.type !== QuestionType.SUBJECTIVE) {
         throw new Error("Question not found or not subjective type");
       }
 
-      const topic = question.session?.topic || "";
-      const isCorrect = await isAnswerCorrect(topic, input.answer, question.content);
+      const isCorrect = await validateAnswerCorrect(input.answer, question.content);
 
       // Update the question with user's answer and result
       await ctx.db.question.update({
         where: { id: input.questionId },
         data: {
           userAnswer: input.answer,
-          isCorrect,
+          isCorrect: isCorrect === "CORRECT",
           answeredAt: new Date()
         },
       });
@@ -149,10 +146,7 @@ export const questionsRouter = createTRPCRouter({
           ? "\n" : "") + input.refinePrompt
       } else if (question) {
         refinePrompt =
-          `Generate 3 more questions like the one below:
-
-${question.content}
-`
+          `The user wants more questions like this:\n\n${question.content} (${question.type})`
       }
 
 
@@ -162,21 +156,37 @@ ${question.content}
       if (!content?.questions.length)
         throw new Error("Failed to generate new questions");
 
-      // Add the new questions to the session
-      let updatedSession = await ctx.db.studySession.update({
-        where: { id: input.sessionId },
-        data: {
-          refinePrompt: refinePrompt ?? undefined,
+      let data: any = {
+        refinePrompt: refinePrompt ?? undefined,
+        questions: {
+          create: content.questions.map(q => ({
+            type: q.type,
+            content: q.content,
+            explanation: q.explanation,
+            options: q.options ?? [],
+            answers: q.answers
+          })),
+        },
+        lastActiveAt: new Date(),
+      }
+      if (input.referenceQuestionId)
+        data = {
           questions: {
             create: content.questions.map(q => ({
               type: q.type,
               content: q.content,
+              explanation: q.explanation,
               options: q.options ?? [],
               answers: q.answers
             })),
           },
           lastActiveAt: new Date(),
-        },
+        }
+
+      // Add the new questions to the session
+      let updatedSession = await ctx.db.studySession.update({
+        where: { id: input.sessionId },
+        data,
       });
 
       return {

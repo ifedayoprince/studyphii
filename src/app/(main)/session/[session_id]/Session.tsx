@@ -60,20 +60,21 @@ export const Session = () => {
             return () => scrollElement.removeEventListener('scroll', handleScroll);
         }
     }, []);
-    useEffect(()=>{
-        if(!output) return;
+    useEffect(() => {
+        if (!output) return;
 
         console.log(output)
         if (output.refinePrompt) {
             setRefinePrompt(output.refinePrompt);
         }
-        setSessionQuestionsRefresher(()=>{refetch()});
+        setSessionQuestionsRefresher(async () => { await refetch() });
     }, [output])
 
     const handleGenerateMore = async () => {
         setIsGenerating(true);
         try {
             await generateQuestions.mutateAsync({ sessionId });
+            await refetch();
         } finally {
             setIsGenerating(false);
         }
@@ -102,6 +103,8 @@ export const Session = () => {
                         >
                             <Question
                                 {...question}
+                                sessionId={sessionId}
+                                refreshQuestions={async () => { await refetch() }}
                                 numbering={idx + 1}
                             />
                         </motion.div>

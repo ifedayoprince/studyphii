@@ -45,6 +45,7 @@ export const sessionRouter = createTRPCRouter({
               create: content?.questions.map(q => ({
                 type: q.type,
                 content: q.content,
+                explanation: q.explanation,
                 options: q.options ?? [],
                 answers: q.answers,
               })),

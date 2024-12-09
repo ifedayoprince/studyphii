@@ -1,4 +1,3 @@
-"use client";
 import Header from "@/components/landing-page/Header";
 import Hero from "@/components/landing-page/Hero";
 import ProblemsComponents from "@/components/landing-page/Problems";
@@ -8,11 +7,17 @@ import FAQ from "@/components/landing-page/FAQ";
 import CTA from "@/components/landing-page/CTA";
 import Footer from "@/components/landing-page/Footer";
 
+import { redirect } from "next/navigation";
+import { getServerAuthSession } from "@/server/auth";
 
-export default function Home() {
+
+export default async function Home() {
+  const session = await getServerAuthSession();
+  if(session)
+    redirect("/session")
 
   return (
-    <main className="dark min-h-screen bg-background">
+    <main className="dark min-h-screen">
       <Header />
       <Hero />
       <ProblemsComponents />
