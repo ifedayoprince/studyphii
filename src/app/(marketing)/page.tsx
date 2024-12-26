@@ -15,6 +15,8 @@ export default async function Home() {
   const session = await getServerAuthSession();
   if(session)
     redirect("/session")
+  else
+  redirect("/auth")
 
   return (
     <main className="dark min-h-screen">

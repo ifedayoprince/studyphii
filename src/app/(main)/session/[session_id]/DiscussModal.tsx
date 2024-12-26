@@ -261,11 +261,6 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
                         exit={{ opacity: 0, y: -20 }}
                         className="flex gap-2"
                       >
-                        <Avatar
-                          size="sm"
-                          src="/studyphii-ai.png"
-                          className="mt-0.5 p-2"
-                        />
                         <div className="p-3 pt-1 max-w-[80%]">
                           <ReactMarkdown
                             className="prose prose-sm dark:prose-invert max-w-none"

@@ -44,7 +44,14 @@ export const authOptions: NextAuthOptions = {
         ...session.user,
         id: user.id,
       },
-    })
+    }),
+    signIn({user}) {
+      const ALLOWED_EMAILS = ["ifedayoprince@gmail.com"];
+      if (!ALLOWED_EMAILS.includes(user.email ?? "")) {
+        return '/beta';
+      }
+      return true;
+    },
   },
   pages: {
     signIn: "/auth"

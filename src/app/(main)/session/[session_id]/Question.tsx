@@ -1,7 +1,7 @@
 import { Button, Radio, RadioGroup, Textarea, Tooltip, Accordion, AccordionItem } from "@nextui-org/react";
 import DiscussModal from "./DiscussModal";
 import { useState, useCallback, useEffect } from "react";
-import { Magicpen, Send2, Book1 } from "iconsax-react";
+import { Magicpen, Send2, Book1, Copy, EyeSlash, Additem } from "iconsax-react";
 import { Question as IQuestion, QuestionType } from "@prisma/client";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { api } from "@/trpc/react";
 import useDebounce from "@/hooks/useDebounce";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 interface QuestionContentProps {
   content?: string | null;
@@ -104,7 +104,7 @@ const QuestionHead: React.FC<QuestionContentProps> = ({
         rehypePlugins={[rehypeKatex, rehypeRaw]}
         components={{
           p: ({ children }) => (
-            <p className="text-xl mb-2 last:mb-0">{children}</p>
+            <p className="text-lg md:text-xl mb-2 last:mb-0">{children}</p>
           ),
           pre: ({ node, ...props }) => (
             <div className="overflow-auto rounded-lg bg-default-200 p-2 my-2">
@@ -210,11 +210,10 @@ export const Question: React.FC<Partial<IQuestion> & {
   const validateSubjectiveMutation = api.questions.validateSubjectiveAnswer.useMutation({
     onSuccess: (data) => {
       setIsCorrect(data.isCorrect == "INCORRECT" ? 2 : 1);
-      if(data.isCorrect == "TRACK") {
-        toast.info("You're on the right track!", {
-          description: "Your answer is close, but could be more precise. Check the explanation for details.",
-          duration: 4000,
-          className: "dark:bg-default-100 dark:text-white",
+      if (data.isCorrect == "TRACK") {
+        toast({
+          title: "You're on the right track!",
+          description: "Your answer is close, but could be more precise. Check the explanation for details."
         });
         setShowExplanation(true);
       }
@@ -284,11 +283,11 @@ export const Question: React.FC<Partial<IQuestion> & {
   const handleAnswerChange = (answer: string) => {
     setUserAnswer(answer);
     if (props.type !== "SUBJECTIVE" && props.type === "MULTIPLE_CHOICE") {
-        // For multiple choice, validate immediately
-        validateAnswer(answer);
-      } else {
-        // For fill-in-blanks, use debounced validation
-        debouncedValidate(answer);
+      // For multiple choice, validate immediately
+      validateAnswer(answer);
+    } else {
+      // For fill-in-blanks, use debounced validation
+      debouncedValidate(answer);
     }
   };
 
@@ -301,6 +300,15 @@ export const Question: React.FC<Partial<IQuestion> & {
         referenceQuestionId: props.id
       });
       await props.refreshQuestions();
+      toast({
+        title: "New questions generated!",
+        description: "Similar practice questions have been added below."
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to generate questions, please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -352,9 +360,9 @@ export const Question: React.FC<Partial<IQuestion> & {
     setShowExplanation(true);
   };
 
-  return <div className="w-full p-10 py-3 rounded-xl group flex gap-8">
+  return <div className="w-full p-10 px-5 md:px-10 py-3 rounded-xl group flex gap-5 md:gap-8">
     <DiscussModal questionId={props?.id || ""} hasHistory={props.hasDiscussion} isOpen={openDiscussModal} onClose={() => setOpenDiscussModal(false)} />
-    <h3 className="text-2xl font-medium text-gray-500">{props.numbering}.</h3>
+    <h3 className="text-xl md:text-2xl font-medium text-gray-500">{props.numbering}.</h3>
     <div className="flex flex-col gap-4 w-full">
       <QuestionHead
         content={props.content}
@@ -426,26 +434,33 @@ export const Question: React.FC<Partial<IQuestion> & {
               startContent={<Magicpen variant="TwoTone" />}
               onClick={() => setOpenDiscussModal(true)}
               variant="shadow"
-              color="success">
-              Explain
-            </Button>
-          </Tooltip>
-          <Tooltip content="Generate similar practice questions" delay={1000}>
-            <Button startContent={null} variant="light" size="sm"
-              onClick={generateSimilarQuestions}
-              isLoading={isGenerating}>
-              More like this
+              color="success"
+              className="md:flex"
+            >
+              <span className="hidden md:inline">Explain</span>
             </Button>
           </Tooltip>
         </div>
-        <div className="flex gap-4">
-          <Tooltip content="Reveal the answer to this question" delay={1000}>
+        <div className="flex gap-2 items-center">
+          <Tooltip content="Generate similar practice questions">
             <Button
+              isIconOnly={true}
+              variant="light"
+              size="sm"
+              onClick={generateSimilarQuestions}
+              isLoading={isGenerating}
+            >
+              <Additem size={20} />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Reveal the answer to this question">
+            <Button
+              isIconOnly={true}
               variant="light"
               size="sm"
               onClick={handleRevealAnswer}
             >
-              Reveal Answer
+              <EyeSlash size={20} />
             </Button>
           </Tooltip>
         </div>

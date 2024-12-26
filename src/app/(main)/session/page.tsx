@@ -11,4 +11,3 @@ export default async function SessionPage() {
         <NewSession />
     </div>
 }
-

@@ -1,16 +1,15 @@
 "use client";
 
-import { Avatar, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab } from "@nextui-org/react"
+import { Avatar, Button, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Tabs, Tab, Popover, PopoverTrigger, PopoverContent } from "@nextui-org/react"
 import { useState, useEffect } from "react";
 import { RefineModal } from "./RefineModal";
 import { EndSessionModal } from "./EndSessionModal";
 import { useRouter } from "next/navigation";
-import { SidebarRight, Moon, Sun, Mobile } from "iconsax-react";
+import { SidebarRight, Moon, Sun, Mobile, ArrowDown2 } from "iconsax-react";
 import { motion } from "framer-motion";
 import { useSession, signOut } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { api } from "@/trpc/react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useGlobalStore } from './globalStore';
 import { useTheme } from "next-themes";
 
@@ -26,6 +25,8 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
   const [mounted, setMounted] = useState(false);
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [isEndModalOpen, setIsEndModalOpen] = useState(false);
+  const [isActionButtonOpen, setIsActionButtonOpen] = useState(false);
+
   const router = useRouter();
   const params = useParams();
   const sessionId = params.session_id as string;
@@ -58,6 +59,34 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
     router.push("/session");
   };
 
+  const ActionButtons = ({ isMobile = false }) => (
+    <>
+      <Button
+        variant={isMobile ? "light" : "shadow"}
+        color="primary"
+        onClick={() => {
+          setIsTopicModalOpen(true)
+          setIsActionButtonOpen(false);
+        }}
+        isLoading={isGenerating}
+        className="w-full"
+      >
+        Refine
+      </Button>
+      <Button
+        variant="light"
+        color="danger"
+        onClick={() => {
+          setIsEndModalOpen(true)
+          setIsActionButtonOpen(false);
+        }}
+        className="w-full"
+      >
+        End Session
+      </Button>
+    </>
+  );
+
   return (
     <>
       <nav className={`${newSession && "absolute top-0"} flex items-center justify-between py-4 px-5 md:px-10 z-10 backdrop-blur-md w-full`}>
@@ -76,30 +105,52 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
               <SidebarRight variant="TwoTone" />
             </Button>
           </motion.div>
-          {!newSession && <h2 className="text-xl font-medium">
-            StudyPhii
-          </h2>
-          }
+          {/* Desktop Title */}
+          {!newSession && (
+            <h2 className="hidden md:block text-xl font-medium">
+              StudyPhii
+            </h2>
+          )}
         </div>
-        <div className="flex gap-3">
-          {newSession
-            ? null
-            : <><Button
-              variant="shadow"
-              color="primary"
-              onClick={() => setIsTopicModalOpen(true)}
-              isLoading={isGenerating}
+
+        {/* Mobile Title with Popover */}
+        {!newSession && (
+          <div className="md:hidden absolute left-1/2 -translate-x-1/2">
+            <Popover
+              placement="bottom"
+              showArrow
+              shouldBlockScroll
+              shouldCloseOnInteractOutside={() => true}
+              onClose={() => setIsActionButtonOpen(false)}
+              isOpen={isActionButtonOpen}
             >
-              Refine
-            </Button>
-              <Button
-                variant="light"
-                color="danger"
-                onClick={() => setIsEndModalOpen(true)}
-              >
-                End Session
-              </Button></>
-          }
+              <PopoverTrigger>
+                <Button
+                  variant="light"
+                  className="flex items-center gap-1"
+                  onClick={() => setIsActionButtonOpen(true)}
+                >
+                  <span className="text-xl font-medium">StudyPhii</span>
+                  <ArrowDown2 size={16} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-2 w-[200px]">
+                <div className="flex flex-col gap-2">
+                  <ActionButtons isMobile />
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          {/* Desktop Action Buttons */}
+          {!newSession && (
+            <div className="hidden md:flex gap-3">
+              <ActionButtons />
+            </div>
+          )}
+
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
               <Avatar
@@ -163,7 +214,7 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
                 </div>
               </DropdownItem>
               <DropdownItem key="settings">Upgrade</DropdownItem>
-              <DropdownItem key="logout" color="danger" onClick={() => signOut({callbackUrl: "/"})}>
+              <DropdownItem key="logout" color="danger" onClick={() => signOut({ callbackUrl: "/" })}>
                 Log Out
               </DropdownItem>
             </DropdownMenu>

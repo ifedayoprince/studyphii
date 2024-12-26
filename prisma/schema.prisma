@@ -48,6 +48,7 @@ model User {
     sessions      Session[]
     studySessions StudySession[]
     subscription  Subscription?
+    referrer      String?
     payments      Payment[]
 }
 
