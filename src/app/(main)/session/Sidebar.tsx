@@ -91,7 +91,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
                         </Button>
                     </div>
                     <Link href="/session" className="w-full" prefetch>
-                        <Button className="w-full border-gray-400 dark:border-transparent" startContent={<Add />} variant="bordered">
+                        <Button className="w-full border-gray-300 dark:border-default" startContent={<Add />} variant="bordered">
                             New Session
                         </Button>
                     </Link>
