@@ -31,7 +31,7 @@ const MessageBubble = forwardRef<HTMLDivElement, MessageBubbleProps>(({ message,
       <div
         className={`${!isAI
             ? "bg-gray-300/40 dark:bg-gray-700/40 text-primary-foreground max-w-[70%] rounded-3xl px-3 py-2"
-            : "p-3 pt-1 max-w-[80%]"
+            : "p-3 pt-1 w-full md:max-w-[80%]"
           }`}
       >
         <ReactMarkdown
