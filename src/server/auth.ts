@@ -46,8 +46,8 @@ export const authOptions: NextAuthOptions = {
       },
     }),
     signIn({user}) {
-      const ALLOWED_EMAILS = ["ifedayoprince@gmail.com"];
-      if (!ALLOWED_EMAILS.includes(user.email ?? "")) {
+      const TESTERS = ["ifedayoprince@gmail.com", "studywithsturdyworks@gmail.com", "reachstudma@gmail.com"];
+      if (!TESTERS.includes(user.email ?? "")) {
         return '/beta';
       }
       return true;
