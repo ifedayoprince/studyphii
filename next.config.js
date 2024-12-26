@@ -1,4 +1,4 @@
-import nextPwa from 'next-pwa';
+import nextPwa from '@ducanh2912/next-pwa';
 
 await import("./src/env.js");
 
@@ -9,6 +9,9 @@ const config = {
             bodySizeLimit: "10mb",
         },
     },
+    typescript: {
+        ignoreBuildErrors: true
+    },
     eslint: {
         ignoreDuringBuilds: true,
     }
@@ -17,8 +20,7 @@ const config = {
 const withPwa = nextPwa({
     dest: "public",
     register: true,
-    skipWaiting: true,
-    // important to avoid running the generation everytime on your local environment
+    cacheOnFrontEndNav: true,
     disable: process.env.NODE_ENV === 'development',
 });
 

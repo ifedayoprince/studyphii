@@ -28,7 +28,7 @@ export const InfluencerTracker = ({session}: {session: Session | null}) => {
 
         if (influencerCookie && session) {
             updateReferrer.mutate({
-                influencerCode: influencerCookie
+                influencerCode: influencerCookie as string,
             })
         }
     }, [])
