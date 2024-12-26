@@ -30,7 +30,7 @@ const MessageBubble = forwardRef<HTMLDivElement, MessageBubbleProps>(({ message,
     >
       <div
         className={`${!isAI
-            ? "bg-gray-700/40 text-primary-foreground max-w-[70%] rounded-full px-3 py-2"
+            ? "bg-gray-300/40 dark:bg-gray-700/40 text-primary-foreground max-w-[70%] rounded-3xl px-3 py-2"
             : "p-3 pt-1 max-w-[80%]"
           }`}
       >
@@ -261,7 +261,7 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
                         exit={{ opacity: 0, y: -20 }}
                         className="flex gap-2"
                       >
-                        <div className="p-3 pt-1 max-w-[80%]">
+                        <div className="p-3 pt-1 max-w-full md:max-w-[80%]">
                           <ReactMarkdown
                             className="prose prose-sm dark:prose-invert max-w-none"
                             remarkPlugins={[remarkMath, remarkGfm]}

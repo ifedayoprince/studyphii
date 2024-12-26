@@ -1,4 +1,4 @@
-import { Button, Radio, RadioGroup, Textarea, Tooltip, Accordion, AccordionItem } from "@nextui-org/react";
+import { Button, Radio, RadioGroup, Textarea, Tooltip, Accordion, AccordionItem, Spinner } from "@nextui-org/react";
 import DiscussModal from "./DiscussModal";
 import { useState, useCallback, useEffect } from "react";
 import { Magicpen, Send2, Book1, Copy, EyeSlash, Additem } from "iconsax-react";
@@ -22,19 +22,19 @@ interface QuestionContentProps {
   onAnswerChange: (answer: string) => void;
 }
 
-const QuestionHead: React.FC<QuestionContentProps> = ({
+const QuestionHead: React.FC<QuestionContentProps & { isValidating: boolean }> = ({
   content,
   type,
   isCorrect,
   userAnswer,
   id,
-  onAnswerChange
+  onAnswerChange,
+  isValidating
 }) => {
   if (!content) return null;
 
-  if (type == "FILL_IN_BLANKS") {
-    // Split content into segments using regex that matches {{slot}}
-    const regex = /(\s\{\{\s*slot\s*\}\}|\s_{10})/gi
+  if (type === "FILL_IN_BLANKS") {
+    const regex = /(\s\{\{\s*slot\s*\}\}|\s_{10})/gi;
     const segments = content.split(regex);
 
     const calculateWidth = useCallback((value: string, inputElement: HTMLInputElement) => {
@@ -56,27 +56,29 @@ const QuestionHead: React.FC<QuestionContentProps> = ({
         {segments.map((segment, idx) => {
           if (regex.test(segment)) {
             return (
-              <input
-                key={`slot-${id}-${idx}`}
-                ref={(el) => {
-                  if (el && userAnswer) {
-                    calculateWidth(userAnswer, el);
-                  }
-                }}
-                className={`bg-transparent text-xl py-0 !outline-none border-b-3  min-w-[7rem] w-[var(--input-width,7rem)] my-1 ${isCorrect == 1
-                  ? "border-success-600 text-success-600 dark:border-success-400 dark:text-success-400"
-                  : isCorrect == 2
-                    ? "border-danger-600 text-danger-600 dark:border-danger-400 dark:text-danger-400"
-                    : "border-gray-600 text-gray-500 dark:border-gray-700 dark:text-gray-400"}`}
-                placeholder=""
-                type="text"
-                value={userAnswer}
-                onChange={(e) => {
-                  const input = e.target;
-                  onAnswerChange(input.value);
-                  calculateWidth(input.value, input);
-                }}
-              />
+              <div key={`slot-${id}-${idx}`} className="flex items-center">
+                <input
+                  ref={(el) => {
+                    if (el && userAnswer) {
+                      calculateWidth(userAnswer, el);
+                    }
+                  }}
+                  className={`bg-transparent text-xl py-0 !outline-none border-b-3 min-w-[7rem] w-[var(--input-width,7rem)] my-1 ${isCorrect === 1
+                    ? "border-success-600 text-success-600 dark:border-success-400 dark:text-success-400"
+                    : isCorrect === 2
+                      ? "border-danger-600 text-danger-600 dark:border-danger-400 dark:text-danger-400"
+                      : "border-gray-600 text-gray-500 dark:border-gray-700 dark:text-gray-400"}`}
+                  placeholder=""
+                  type="text"
+                  value={userAnswer}
+                  onChange={(e) => {
+                    const input = e.target;
+                    onAnswerChange(input.value);
+                    calculateWidth(input.value, input);
+                  }}
+                />
+                {isValidating && <Spinner size="sm" />}
+              </div>
             );
           }
 
@@ -254,10 +256,14 @@ export const Question: React.FC<Partial<IQuestion> & {
           ) ?? -1;
           newIsCorrect = selectedIndex === correctIndex;
           setIsCorrect(newIsCorrect ? 1 : 2);
+
+          if (newIsCorrect)
+            setShowExplanation(true);
+
           break;
 
         case "FILL_IN_BLANKS":
-          // Normalize both answers for comparison
+          // Check if the input matches any of the possible answers first
           const normalizedInput = answer.trim().toLowerCase();
           const normalizedAnswers = props.answers.map(ans => ans.trim().toLowerCase());
 
@@ -265,6 +271,16 @@ export const Question: React.FC<Partial<IQuestion> & {
           newIsCorrect = normalizedAnswers.some(
             correctAns => normalizedInput === correctAns
           );
+
+          if (!newIsCorrect) {
+            // If not correct, validate as a subjective question
+            setIsValidating(true);
+            validateSubjectiveMutation.mutateAsync({
+              questionId: props.id ?? "",
+              answer: answer,
+            });
+            return;
+          }
           setIsCorrect(newIsCorrect ? 1 : 2);
           break;
       }
@@ -284,10 +300,10 @@ export const Question: React.FC<Partial<IQuestion> & {
 
   const handleAnswerChange = (answer: string) => {
     setUserAnswer(answer);
-    if (props.type !== "SUBJECTIVE" && props.type === "MULTIPLE_CHOICE") {
+    if (props.type === "MULTIPLE_CHOICE") {
       // For multiple choice, validate immediately
       validateAnswer(answer);
-    } else {
+    } else if (props.type == "FILL_IN_BLANKS") {
       // For fill-in-blanks, use debounced validation
       debouncedValidate(answer);
     }
@@ -382,6 +398,7 @@ export const Question: React.FC<Partial<IQuestion> & {
           setIsCorrect(0);
           handleAnswerChange(answer);
         }}
+        isValidating={isValidating}
       />
       <QuestionOptions
         type={props.type}

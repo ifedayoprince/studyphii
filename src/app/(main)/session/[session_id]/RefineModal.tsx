@@ -12,7 +12,6 @@ interface RefineModalProps {
 export function RefineModal({ isOpen, onClose, onSubmit }: RefineModalProps) {
     const {refinePrompt, setRefinePrompt} = useGlobalStore();
 
-
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="2xl">
             <ModalContent>

@@ -12,6 +12,8 @@ import { useParams } from "next/navigation";
 import { api } from "@/trpc/react";
 import { useGlobalStore } from './globalStore';
 import { useTheme } from "next-themes";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { toast } from "@/hooks/use-toast";
 
 interface SessionHeaderProps {
   onOpenSidebar: () => void;
@@ -26,6 +28,7 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [isEndModalOpen, setIsEndModalOpen] = useState(false);
   const [isActionButtonOpen, setIsActionButtonOpen] = useState(false);
+  const isOnline = useOnlineStatus();
 
   const router = useRouter();
   const params = useParams();
@@ -42,6 +45,13 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
   if (!mounted) return null;
 
   const handleRefinePrompt = async (topic: string) => {
+    if (!isOnline) {
+      toast({
+        title: "You are offline!",
+        description: "Please connect to the internet to generate more questions."
+      });
+      return;
+    }
     setIsGenerating(true);
     try {
       await moreQuestionsMutation.mutateAsync({
@@ -135,7 +145,7 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="p-2 w-[200px]">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 w-full">
                   <ActionButtons isMobile />
                 </div>
               </PopoverContent>

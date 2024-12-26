@@ -10,7 +10,7 @@ interface EndSessionModalProps {
 
 export function EndSessionModal({ isOpen, onClose, onConfirm }: EndSessionModalProps) {
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} placement="center">
             <ModalContent>
                 {(onClose) => (
                     <>

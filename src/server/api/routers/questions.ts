@@ -60,8 +60,8 @@ export const questionsRouter = createTRPCRouter({
         where: { id: input.questionId }
       });
 
-      if (!question || question.type !== QuestionType.SUBJECTIVE) {
-        throw new Error("Question not found or not subjective type");
+      if (!question || question.type == QuestionType.MULTIPLE_CHOICE) {
+        throw new Error("Question not found or is not supported.");
       }
 
       const isCorrect = await validateAnswerCorrect(input.answer, question.content);
@@ -71,7 +71,7 @@ export const questionsRouter = createTRPCRouter({
         where: { id: input.questionId },
         data: {
           userAnswer: input.answer,
-          isCorrect: isCorrect === "CORRECT",
+          isCorrect: isCorrect !== "INCORRECT",
           answeredAt: new Date()
         },
       });

@@ -76,57 +76,60 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     const hasNoSessions = history && history.length === 0;
 
     return (
-        <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: isOpen ? "16rem" : 0 }}
-            transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-            className="fixed z-50 md:sticky h-screen grid grid-rows-[max-content,auto] overflow-hidden border-r border-gray-500/10 bg-black/10 backdrop-blur-xl md:backdrop-blur-none md:bg-transparent"
-        >
-            <div className="flex flex-col gap-4 p-4 px-3 mb-6">
-                <div className="flex justify-start">
-                    <Button isIconOnly variant="light" onClick={onClose}>
-                        <SidebarLeft variant="TwoTone" />
-                    </Button>
+        <div>
+            <div className={`fixed z-30 h-screen w-screen overflow-hidden ${isOpen ? 'block' : 'hidden'} md:!hidden`} onClick={onClose}></div>
+            <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: isOpen ? "16rem" : 0 }}
+                transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                className="fixed z-50 md:sticky grid grid-rows-[max-content,auto] h-screen overflow-hidden border-r border-gray-500/10 bg-black/10 backdrop-blur-xl md:backdrop-blur-none md:bg-transparent"
+            >
+                <div className="flex flex-col gap-4 p-4 px-3 mb-6">
+                    <div className="flex justify-start">
+                        <Button isIconOnly variant="light" onClick={onClose}>
+                            <SidebarLeft variant="TwoTone" />
+                        </Button>
+                    </div>
+                    <Link href="/session" className="w-full" prefetch>
+                        <Button className="w-full border-gray-400 dark:border-transparent" startContent={<Add />} variant="bordered">
+                            New Session
+                        </Button>
+                    </Link>
                 </div>
-                <Link href="/session" className="w-full" prefetch>
-                    <Button className="w-full" startContent={<Add />} variant="bordered">
-                        New Session
-                    </Button>
-                </Link>
-            </div>
-            <ScrollShadow className="flex flex-col gap-8 p-4 px-3 w-full h-full" hideScrollBar>
-                {isLoading ? (
-                    <div className="flex justify-center items-center h-full">
-                        <Spinner />
-                    </div>
-                ) : hasNoSessions ? (
-                    <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-4">
-                        <Book1
-                            size={32}
-                            variant="Bulk"
-                            className="text-foreground-400"
-                        />
-                        <div className="space-y-2">
-                            <p className="text-sm font-medium text-foreground-600">
-                                No sessions yet
-                            </p>
-                            <p className="text-xs text-foreground-400">
-                                Start a new session to begin learning
-                            </p>
+                <ScrollShadow className="flex flex-col gap-8 p-4 px-3 w-full h-full" hideScrollBar>
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-full">
+                            <Spinner />
                         </div>
-                    </div>
-                ) : (
-                    Object.entries(groupedHistory).map(([groupName, items]) => (
-                        <div key={groupName} className="flex flex-col gap-1">
-                            <p className="text-xs text-foreground-500 font-medium px-2">
-                                {groupName}
-                            </p>
-                            {items.map((item) => <SessionButton key={item.id} id={item.id} title={item.title} />)}
+                    ) : hasNoSessions ? (
+                        <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-4">
+                            <Book1
+                                size={32}
+                                variant="Bulk"
+                                className="text-foreground-400"
+                            />
+                            <div className="space-y-2">
+                                <p className="text-sm font-medium text-foreground-600">
+                                    No sessions yet
+                                </p>
+                                <p className="text-xs text-foreground-400">
+                                    Start a new session to begin learning
+                                </p>
+                            </div>
                         </div>
-                    ))
-                )}
-            </ScrollShadow>
-        </motion.div>
+                    ) : (
+                        Object.entries(groupedHistory).map(([groupName, items]) => (
+                            <div key={groupName} className="flex flex-col gap-1">
+                                <p className="text-xs text-foreground-500 font-medium px-2">
+                                    {groupName}
+                                </p>
+                                {items.map((item) => <SessionButton key={item.id} id={item.id} title={item.title} />)}
+                            </div>
+                        ))
+                    )}
+                </ScrollShadow>
+            </motion.div>
+        </div>
     )
 }
 
