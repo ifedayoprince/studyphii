@@ -5,10 +5,14 @@ import { ArrowUpIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { toast } from "@/hooks/use-toast";
+
 
 export function NewSession() {
     const [input, setInput] = useState("");
     const router = useRouter();
+    const isOnline = useOnlineStatus();
 
     const utils = api.useUtils();
     const { mutate: createSession, isPending } = api.session.create.useMutation({
@@ -34,6 +38,13 @@ export function NewSession() {
     });
 
     const handleSubmit = () => {
+        if (!isOnline) {
+            toast({
+                title: "You are offline!",
+                description: "Please connect to the internet to create a session",
+            });
+            return;
+        };
         const trimmedInput = input.trim();
         if (trimmedInput) {
             createSession({ topic: trimmedInput });

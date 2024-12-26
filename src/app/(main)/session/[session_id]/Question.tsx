@@ -11,6 +11,7 @@ import rehypeRaw from "rehype-raw";
 import { api } from "@/trpc/react";
 import useDebounce from "@/hooks/useDebounce";
 import { toast } from "@/hooks/use-toast";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 interface QuestionContentProps {
   content?: string | null;
@@ -204,8 +205,9 @@ export const Question: React.FC<Partial<IQuestion> & {
   const [isCorrect, setIsCorrect] = useState(props.isCorrect == null ? 0 : props.isCorrect == true ? 1 : 2);
   const [userAnswer, setUserAnswer] = useState(props.userAnswer);
   const [isValidating, setIsValidating] = useState(false);
-  const id = props?.id || "";
   const [showExplanation, setShowExplanation] = useState(false);
+  const isOnline = useOnlineStatus();
+  const id = props?.id || "";
 
   const validateSubjectiveMutation = api.questions.validateSubjectiveAnswer.useMutation({
     onSuccess: (data) => {
@@ -315,7 +317,13 @@ export const Question: React.FC<Partial<IQuestion> & {
   }
   const handleSubjectiveSubmit = () => {
     if (!userAnswer) return;
-
+    if (!isOnline) {
+      toast({
+        title: "You are offline!",
+        description: "Please connect to the internet to answer subjective questions.",
+      });
+      return;
+    };
     if (userAnswer.trim()) {
       validateAnswer(userAnswer);
     }
@@ -428,7 +436,7 @@ export const Question: React.FC<Partial<IQuestion> & {
         </Accordion>
       )}
       <div className="flex justify-between w-full opacity-0 translate-y-2 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-250">
-        <div className="flex gap-4 items-center">
+        <div className={`${isOnline ? "flex" : "hidden"} gap-4 items-center`}>
           <Tooltip content="Get AI help with this question" delay={1000}>
             <Button
               startContent={<Magicpen variant="TwoTone" />}
@@ -442,7 +450,7 @@ export const Question: React.FC<Partial<IQuestion> & {
           </Tooltip>
         </div>
         <div className="flex gap-2 items-center">
-          <Tooltip content="Generate similar practice questions">
+          {isOnline && <Tooltip content="Generate similar practice questions">
             <Button
               isIconOnly={true}
               variant="light"
@@ -452,7 +460,7 @@ export const Question: React.FC<Partial<IQuestion> & {
             >
               <Additem size={20} />
             </Button>
-          </Tooltip>
+          </Tooltip>}
           <Tooltip content="Reveal the answer to this question">
             <Button
               isIconOnly={true}
