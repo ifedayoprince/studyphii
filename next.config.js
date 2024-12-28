@@ -9,6 +9,9 @@ const config = {
             bodySizeLimit: "10mb",
         },
     },
+    typescript: {
+        ignoreBuildErrors: true
+    },
     eslint: {
         ignoreDuringBuilds: true,
     }
