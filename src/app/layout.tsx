@@ -11,15 +11,14 @@ import { InfluencerTracker } from "./influencer";
 import { getServerAuthSession } from "@/server/auth";
 
 export const metadata: Metadata = {
-  title: 'StudyPhii — AI Learning Platform',
-  description: 'StudyPhii is a platform that generates practice questions for your study session.',
-  icons: [{ rel: "icon", url: "./favicon.ico" }],
-  manifest: "manifest.json",
+  title: 'StudyPhii — Get exam-ready in record time',
+  description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
+  manifest: "./manifest.json",
   openGraph: {
     url: 'https://study.phii.space',
     type: 'website',
-    title: 'StudyPhii — AI Learning Platform',
-    description: 'StudyPhii is a platform that generates practice questions for your study session.',
+    title: 'StudyPhii — Get exam-ready in record time',
+    description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
     images: [
       {
         url: './og.png',
@@ -33,8 +32,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     creator: "Phii Space",
     site: 'https://study.phii.space',
-    title: 'StudyPhii — AI Learning Platform',
-    description: 'StudyPhii is a platform that generates practice questions for your study session.',
+    title: 'StudyPhii — Get exam-ready in record time',
+    description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
     images: [
       {
         url: './og.png',
