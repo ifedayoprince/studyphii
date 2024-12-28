@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { InfluencerTracker } from "./influencer";
 import { getServerAuthSession } from "@/server/auth";
 
+
 export const metadata: Metadata = {
   title: 'StudyPhii — Get exam-ready in record time',
   description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
@@ -51,19 +52,17 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
+        {env.NEXT_PUBLIC_ENV == "production" && <Script
+          src="https://cloud.umami.is/script.js"
+          data-website-id="c7b9b62d-9fad-4050-93b4-10037352ea1e"
+          defer
+          />}
       <body>
         <Providers>
           {children}
-
           <InfluencerTracker session={session} />
         </Providers>
         <Toaster />
-
-        {env.NEXT_PUBLIC_ENV == "production" && <Script
-          src="https://cloud.umami.is/script.js"
-          data-website-id="e5960873-de0f-4c97-ba94-6fd0c953524f"
-          strategy="lazyOnload"
-        />}
       </body>
     </html>
   );
