@@ -7,7 +7,7 @@ import { format, isToday, isYesterday, differenceInDays } from "date-fns"
 import Link from "next/link"
 import { api } from "@/trpc/react"
 import { Spinner } from "@nextui-org/react"
-import { useQueryClient } from "@tanstack/react-query"
+
 
 interface HistoryItem {
     id: string;

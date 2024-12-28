@@ -247,12 +247,7 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
                         exit={{ opacity: 0, y: -20 }}
                         className="flex gap-2 items-center"
                       >
-                        <Avatar
-                          size="sm"
-                          src="/studyphii-ai.png"
-                          className="mt-0.5 p-2"
-                        />
-                        <div className="bg-white/90 rounded-full w-4 h-4 animate-pulse" />
+                        <div className="bg-gray-300/90 dark:bg-white/90 rounded-full w-4 h-4 animate-pulse" />
                         </motion.div>)}
                     {(streamingText && streamingText.trim() != "") && (
                       <motion.div

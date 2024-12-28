@@ -9,9 +9,6 @@ const config = {
             bodySizeLimit: "10mb",
         },
     },
-    typescript: {
-        ignoreBuildErrors: true
-    },
     eslint: {
         ignoreDuringBuilds: true,
     }
@@ -20,8 +17,11 @@ const config = {
 const withPwa = nextPwa({
     dest: "public",
     register: true,
-    cacheOnFrontEndNav: true,
+    // cacheOnFrontEndNav: true,
     disable: process.env.NODE_ENV === 'development',
+    fallbacks: {
+        document: "/~offline"
+    }
 });
 
 export default withPwa(config);

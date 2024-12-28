@@ -32,6 +32,10 @@ export const env = createEnv({
     RESEND_API_KEY: z.string(),
     PAYSTACK_PUBLIC_KEY: z.string(),
     PAYSTACK_SECRET_KEY: z.string(),
+    LANGCHAIN_TRACING_V2: z.boolean().default(false),
+    LANGCHAIN_ENDPOINT: z.string().url(),
+    LANGCHAIN_API_KEY: z.string(),
+    LANGCHAIN_PROJECT: z.string(),
   },
 
   /**
@@ -62,6 +66,10 @@ export const env = createEnv({
     PAYSTACK_PUBLIC_KEY: process.env.PAYSTACK_PUBLIC_KEY,
     PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY,
     NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV,
+    LANGCHAIN_TRACING_V2: process.env.LANGCHAIN_TRACING_V2 === 'true',
+    LANGCHAIN_ENDPOINT: process.env.LANGCHAIN_ENDPOINT,
+    LANGCHAIN_API_KEY: process.env.LANGCHAIN_API_KEY,
+    LANGCHAIN_PROJECT: process.env.LANGCHAIN_PROJECT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

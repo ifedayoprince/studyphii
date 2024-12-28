@@ -45,6 +45,7 @@
     "iconsax-react": "^0.0.8",
     "jsonwebtoken": "^9.0.2",
     "katex": "^0.16.11",
+    "langsmith": "^0.2.14",
     "lodash": "^4.17.21",
     "lucide-react": "^0.447.0",
     "next": "^14.2.4",
