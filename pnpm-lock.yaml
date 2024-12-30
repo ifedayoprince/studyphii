@@ -158,6 +158,9 @@ dependencies:
   superjson:
     specifier: ^2.2.1
     version: 2.2.1
+  swiper:
+    specifier: ^11.1.15
+    version: 11.1.15
   tailwind-merge:
     specifier: ^2.5.3
     version: 2.5.3
@@ -10149,6 +10152,11 @@ packages:
 
   /svg-arc-to-cubic-bezier@3.2.0:
     resolution: {integrity: sha512-djbJ/vZKZO+gPoSDThGNpKDO+o+bAeA4XQKovvkNCqnIS2t+S4qnLAGQhyyrulhCFRl1WWzAp0wUDV8PpTVU3g==}
+    dev: false
+
+  /swiper@11.1.15:
+    resolution: {integrity: sha512-IzWeU34WwC7gbhjKsjkImTuCRf+lRbO6cnxMGs88iVNKDwV+xQpBCJxZ4bNH6gSrIbbyVJ1kuGzo3JTtz//CBw==}
+    engines: {node: '>= 4.7.0'}
     dev: false
 
   /tailwind-merge@1.14.0:

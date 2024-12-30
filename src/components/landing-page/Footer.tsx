@@ -1,5 +1,5 @@
 "use client"
-import React, {  } from 'react';
+import React from 'react';
 import FooterConfig from './config/footer/footer.json';
 
 const Footer: React.FC = () => {
@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
                     <div className='flex-grow flex flex-wrap md:pl-24 -mb-10 md:mt-0 mt-10 text-center md:text-left'>
                         {sections.map((section, index) => (
                             <div key={index} className='lg:w-1/3 md:w-1/2 w-full px-4'>
-                                <div className="font-semibold text-foreground-hsl/65 tracking-widest text-sm md:text-left mb-3">{section.title}</div>
+                                <div className="font-semibold text-gray-400 tracking-widest text-sm md:text-left mb-3">{section.title}</div>
                                 <div className='flex flex-col justify-center items-center md:items-start gap-2 mb-10 text-sm'>
                                     {section.links.map((link, linkIndex) => (
                                         <a key={linkIndex} className="hover:underline" href={link.href}>{link.text}</a>

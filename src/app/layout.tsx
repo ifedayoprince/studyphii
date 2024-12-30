@@ -1,5 +1,11 @@
+import 'swiper/css';
+import 'swiper/css/effect-cube';
+import 'swiper/css/effect-cards';
+import 'swiper/css/pagination';
+
 import "@/styles/globals.css";
 import "katex/dist/katex.min.css";
+
 
 import { GeistSans } from "geist/font/sans";
 import Script from "next/script";
@@ -12,13 +18,13 @@ import { getServerAuthSession } from "@/server/auth";
 
 
 export const metadata: Metadata = {
-  title: 'StudyPhii — Get exam-ready in record time',
+  title: 'Get exam-ready in record time | StudyPhii',
   description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
   manifest: "./manifest.json",
   openGraph: {
     url: 'https://study.phii.space',
     type: 'website',
-    title: 'StudyPhii — Get exam-ready in record time',
+    title: 'Get exam-ready in record time | StudyPhii',
     description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
     images: [
       {
@@ -33,7 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     creator: "Phii Space",
     site: 'https://study.phii.space',
-    title: 'StudyPhii — Get exam-ready in record time',
+    title: 'Get exam-ready in record time | StudyPhii',
     description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
     images: [
       {

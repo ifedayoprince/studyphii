@@ -115,7 +115,7 @@ const GoogleSearchBar: React.FC = () => {
     );
 };
 
-const Testimonials11: React.FC = () => {
+const ArticleReference: React.FC = () => {
     const headerRef = useRef(null);
     const gridRef = useRef(null);
     const isHeaderInView = useInView(headerRef, { once: true, margin: "-20%" });
@@ -226,4 +226,4 @@ const Testimonials11: React.FC = () => {
     );
 };
 
-export default Testimonials11;
+export default ArticleReference;

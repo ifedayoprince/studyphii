@@ -9,10 +9,10 @@ import { Book1, Teacher, Timer1, MessageQuestion } from 'iconsax-react';
 const ProblemsComponents: React.FC = () => {
 
     return (
-        <section className='relative bg-card text-neutral-content rounded-xl p-2 md:p-12 max-w-xs md:max-w-3xl mx-auto text-center text-lg' id='problems'>
+        <section className='relative bg-card text-neutral-content rounded-xl p-2 md:p-12 max-w-xs md:max-w-3xl mx-auto text-center text-lg mt-24 md:mt-0' id='problems'>
             <div className='flex flex-col text-center w-full mb-10'>
-                <Label text={"Problems"} />
-                <h2 className="font-bold text-3xl lg:text-5xl tracking-tight mb-2 max-w-2xl mx-auto">Stop Wasting Time, Start Studying Faster</h2>
+                <Label text={"Problem"} />
+                <h2 className="font-bold text-3xl lg:text-5xl tracking-tight mb-2 max-w-2xl mx-auto">Studying is hard 😥!</h2>
             </div>
             <div className='leading-relaxed space-y-4 md:space-y-6'>
                 <div className="text-neutral-content/80 space-y-1">
@@ -63,6 +63,10 @@ const ProblemsComponents: React.FC = () => {
                         </motion.div>
                     </div>
                 </div>
+            </div>
+
+            <div className="flex items-center justify-center text-gray-400 text-sm mt-14 mb-20">
+                ↓ There's an easier way
             </div>
         </section>
     );

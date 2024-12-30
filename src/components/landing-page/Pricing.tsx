@@ -15,13 +15,13 @@ const Pricing: React.FC = () => {
 
     return (
         <section className='bg-black' id="pricing">
-            <div className='py-24 pb-0 px-8 max-w-5xl mx-auto'>
+            <div className='py-24 px-8 max-w-5xl mx-auto'>
                 <div className='flex flex-col text-center w-full mb-20'>
                     <Label text="Pricing" />
-                    <h2 className="font-extrabold text-3xl lg:text-5xl tracking-tight mt-3 mb-8 max-w-2xl mx-auto">Make Learning Interactive Again</h2>
+                    <h2 className="font-extrabold text-3xl lg:text-5xl tracking-tight mt-3 mb-8 max-w-2xl mx-auto">Start studying smarter</h2>
                     <p className='text-sm md:text-base flex justify-center items-center gap-2 '>
                         <span>
-                            Pick the&nbsp;
+                            Pick a&nbsp;
                             <span className="text-lime-500">plan</span>&nbsp;that suits you and get access to the full package.
                         </span>
                     </p>
@@ -36,10 +36,10 @@ const Pricing: React.FC = () => {
                                 <div className="flex flex-col justify-end mb-[4px] text-lg ">
                                     <p className="relative opacity-80">
                                         <span className="absolute bg-base-content h-[1.5px] inset-x-0 top-[48%]"></span>
-                                        <span className="text-base-content line-through">$69</span>
+                                        <span className="text-base-content line-through">$39</span>
                                     </p>
                                 </div>
-                                <p className="text-5xl tracking-tight font-extrabold">$39</p>
+                                <p className="text-5xl tracking-tight font-extrabold">$29</p>
                                 <div className="flex flex-col justify-end mb-[4px]">
                                     <p className="text-xs opacity-60 uppercase font-semibold">USD</p>
                                 </div>
@@ -65,10 +65,10 @@ const Pricing: React.FC = () => {
                                 <div className="flex flex-col justify-end mb-[4px] text-lg ">
                                     <p className="relative opacity-80">
                                         <span className="absolute bg-base-content h-[1.5px] inset-x-0 top-[48%]"></span>
-                                        <span className="text-base-content line-through">$160</span>
+                                        <span className="text-base-content line-through">$129</span>
                                     </p>
                                 </div>
-                                <p className="text-5xl tracking-tight font-extrabold">$129</p>
+                                <p className="text-5xl tracking-tight font-extrabold">$98</p>
                                 <div className="flex flex-col justify-end mb-[4px]">
                                     <p className="text-xs opacity-60 uppercase font-semibold">USD</p>
                                 </div>

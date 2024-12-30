@@ -2,28 +2,28 @@
     "title": "Featured on",
     "logos": [
       {
-        "src": "/logos/HackerNews.png",
-        "alt": "HackerNews",
-        "title": "HackerNews",
-        "link": "#"
+        "src": "https://img.icons8.com/?size=100&id=32309&format=png&color=6b7280",
+        "alt": "Instagram",
+        "title": "Instagram",
+        "link": "https://instagram.com"
       },
       {
-        "src": "/logos/indieHackerLogo.png",
-        "alt": "IndieHacker",
-        "title": "IndieHacker",
-        "link": "#"
+        "src": "https://img.icons8.com/?size=100&id=118638&format=png&color=6b7280",
+        "alt": "TikTok",
+        "title": "TikTok",
+        "link": "https://tiktok.com"
       },
       {
-        "src": "/logos/reddit_logo.png",
+        "src": "https://img.icons8.com/?size=100&id=pxXrsP5hCqZw&format=png&color=6b7280",
         "alt": "Reddit",
         "title": "Reddit",
         "link": "#"
       },
       {
-        "src": "/logos/product_hunt_logo.png",
-        "alt": "Product Hunt",
-        "title": "Product Hunt",
-        "link": "#"
+        "src": "https://img.icons8.com/?size=100&id=phOKFKYpe00C&format=png&color=6b7280",
+        "alt": "X",
+        "title": "X",
+        "link": "https://x.com"
       }
     ]
   }
