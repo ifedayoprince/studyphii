@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       break;
     }
     case "payment.succeeded": {
-      const TRIAL_PRODUCT_ID = "pdt_5mchpws2rFiGNBHTlR113";
+      const TRIAL_PRODUCT_ID = env.NEXT_PUBLIC_ENV == "production" ? "pdt_RyLrnkiBMWPlEuJxyuAyl" : "pdt_5mchpws2rFiGNBHTlR113";
       const userId = payload.data?.metadata?.userId;
 
       const isTrial = payload.data?.product_cart[0]?.product_id == TRIAL_PRODUCT_ID;

@@ -41,7 +41,8 @@ export function NewSession() {
     });
 
     useEffect(() => {
-        // console.log(path, path.get("login"))
+        if (!session?.user) return;
+
         if (path.get("login")) {
             posthog.identify(session?.user.id, {}, {
                 email: session?.user.email,
@@ -51,7 +52,7 @@ export function NewSession() {
             posthog.capture("user logged in");
             router.replace("/session")
         }
-    }, [path])
+    }, [path, session]);
     const handleSubmit = () => {
         if (!isOnline) {
             toast({

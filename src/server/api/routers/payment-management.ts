@@ -50,13 +50,13 @@ export const paymentManagementRouter = createTRPCRouter({
       if (hasTakenTrial && input.plan == "trial") {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "User has already taken a trial"
+          message: "The 72-hour trial can only be used once."
         });
       }
 
       try {
         let link = "";
-        const host = env.NODE_ENV == "production" ? "https://live.dodopayments.com" : "https://test.dodopayments.com";
+        const host = env.NEXT_PUBLIC_ENV == "production" ? "https://live.dodopayments.com" : "https://test.dodopayments.com";
         
         if (input.plan === "yearly") {
           const response = await fetch(`${host}/subscriptions`, {
@@ -68,7 +68,7 @@ export const paymentManagementRouter = createTRPCRouter({
                 name: ctx.session?.user.name
               },
               metadata: { userId: ctx.session?.user.id },
-              product_id: "pdt_sOOK8fNIzvzRc116OScUj",
+              product_id: env.NEXT_PUBLIC_ENV == "production" ? "pdt_DdMXRcvIBZeayeftj2Aed" : "pdt_sOOK8fNIzvzRc116OScUj",
               quantity: 1,
               payment_link: true,
               return_url: `${env.HOSTED_URL}/congratulations`
@@ -94,7 +94,7 @@ export const paymentManagementRouter = createTRPCRouter({
               return_url: `${env.HOSTED_URL}/congratulations`,
               product_cart: [
                 {
-                  product_id: "pdt_ZGYAD8yfzFxOv8iFFgDUG",
+                  product_id: env.NEXT_PUBLIC_ENV == "production" ? "pdt_ZvTshfL8g6szi9xB20amq" : "pdt_ZGYAD8yfzFxOv8iFFgDUG",
                   quantity: 1
                 }
               ],
@@ -121,7 +121,7 @@ export const paymentManagementRouter = createTRPCRouter({
               return_url: `${env.HOSTED_URL}/congratulations`,
               product_cart: [
                 {
-                  product_id: "pdt_5mchpws2rFiGNBHTlR113",
+                  product_id: env.NEXT_PUBLIC_ENV == "production" ? "pdt_RyLrnkiBMWPlEuJxyuAyl" : "pdt_5mchpws2rFiGNBHTlR113",
                   quantity: 1
                 }
               ],
@@ -144,7 +144,7 @@ export const paymentManagementRouter = createTRPCRouter({
         console.log(e)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Could not create payment link"
+          message: "Could not create payment link."
         });
       }
     })
