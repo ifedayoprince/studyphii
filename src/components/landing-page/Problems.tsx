@@ -7,7 +7,6 @@ import { Book1, Teacher, Timer1, MessageQuestion } from 'iconsax-react';
 
 
 const ProblemsComponents: React.FC = () => {
-
     return (
         <section className='relative bg-card text-neutral-content rounded-xl p-2 md:p-12 max-w-xs md:max-w-3xl mx-auto text-center text-lg mt-24 md:mt-0' id='problems'>
             <div className='flex flex-col text-center w-full mb-10'>

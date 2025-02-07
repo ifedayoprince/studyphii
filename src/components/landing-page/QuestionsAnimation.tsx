@@ -28,7 +28,7 @@ export const QuestionsAnimation = () => {
                     className="mySwiper"
                 >
                     {mockQuestions.map((question, i)=> <SwiperSlide className='rounded-xl h-auto bg-color1/30 border border-color2 backdrop-blur-lg aspect-square min-w-[90%]'>
-                        <QuestionMock {...question} numbering={i + 1} />
+                        <QuestionMock key={i} {...question} numbering={i + 1} />
                     </SwiperSlide>)}
                 </Swiper>
             </div>

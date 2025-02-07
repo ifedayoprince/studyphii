@@ -1,6 +1,6 @@
 import { getServerAuthSession } from "@/server/auth";
 import { redirect } from "next/navigation";
-import { NewSession } from "./NewSession"
+import { NewSession } from "./NewSession";
 
 export default async function SessionPage() {
     const session = await getServerAuthSession();

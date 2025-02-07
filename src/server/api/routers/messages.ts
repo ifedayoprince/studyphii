@@ -3,6 +3,7 @@ import { Role } from "@prisma/client";
 import { generateAIChatResponse } from "../utils/openai";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import PostHogClient from "@/posthog";
 
 
 
@@ -66,7 +67,18 @@ export const messagesRouter = createTRPCRouter({
         orderBy: { createdAt: "desc" },
         take: 20,
       });
-      console.log(previousMessages)
+
+      if (previousMessages.length == 0) {
+        const posthog = PostHogClient();
+        posthog.capture({
+          distinctId: ctx.session?.user?.id,
+          event: "ai chat started",
+          properties: {
+            questionId: input.questionId
+          }
+        });
+        await posthog.shutdown();
+      }
 
 
       // Get the question for additional context
@@ -89,17 +101,6 @@ export const messagesRouter = createTRPCRouter({
       try {
         // Format messages for OpenAI
         for await (const chunk of generateAIChatResponse(question, [...previousMessages, { content: input.content, role: "user" }])) {
-          // Check if message has been aborted
-          // const currentMessage = await ctx.db.message.findUnique({
-          //   where: { id: aiMessage.id }
-          // });
-
-          // if (currentMessage?.isAborted) {
-          //   failed = true;
-          //   console.log("breaking")
-          //   break;
-          // }
-
           fullResponse += chunk;
           yield chunk;
         }

@@ -54,6 +54,7 @@ const QuestionHead: React.FC<{
                         calculateWidth(userAnswer, el);
                       }
                     }}
+                    readOnly
                     className={`bg-transparent text-xl py-0 !outline-none border-b-3 min-w-[7rem] w-[var(--input-width,7rem)] my-1 ${isCorrect === 1
                       ? "border-success-600 text-success-600 dark:border-success-400 dark:text-success-400"
                       : isCorrect === 2

@@ -10,10 +10,8 @@ export function useVideoIntersection(threshold: number = 0.7) {
                 entries.forEach((entry) => {
                     setIsInView(entry.isIntersecting);
                     if (entry.isIntersecting && videoRef.current) {
-                        videoRef.current.play().catch(() => {
-                            // Handle any autoplay restrictions
-                            console.log('Autoplay prevented');
-                        });
+                        // videoRef.current.play().catch(() => {
+                        // });
                     } else if (videoRef.current) {
                         videoRef.current.pause();
                     }

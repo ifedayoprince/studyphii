@@ -1,13 +1,13 @@
 import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
-import {nextui} from "@nextui-org/react";
+import { nextui } from "@nextui-org/react";
 
 
 export default {
 	darkMode: ["class"],
 	content: [
 		"./src/**/*.tsx",
-		    "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}"
+		"./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}"
 	],
 	theme: {
 		extend: {
@@ -80,11 +80,22 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'gradient-xy': {
+					'0%, 100%': {
+						'background-size': '400% 400%',
+						'background-position': 'left center'
+					},
+					'50%': {
+						'background-size': '200% 200%',
+						'background-position': 'right center'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'gradient-xy': 'gradient-xy 6s ease infinite'
 			}
 		}
 	},

@@ -14,7 +14,8 @@ const config = {
     },
     eslint: {
         ignoreDuringBuilds: true,
-    }
+    },
+    skipTrailingSlashRedirect: true, 
 };
 
 const withPwa = nextPwa({

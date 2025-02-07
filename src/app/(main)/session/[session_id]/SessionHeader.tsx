@@ -14,14 +14,16 @@ import { useGlobalStore } from './globalStore';
 import { useTheme } from "next-themes";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { toast } from "@/hooks/use-toast";
+import posthog from "posthog-js";
 
 interface SessionHeaderProps {
   onOpenSidebar: () => void;
   openSidebar: boolean;
   newSession?: boolean;
+  mock?: boolean;
 }
 
-export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: SessionHeaderProps) => {
+export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession, mock }: SessionHeaderProps) => {
   const { data } = useSession();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -37,7 +39,6 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
   const { sessionQuestionsRefresher } = useGlobalStore();
   const moreQuestionsMutation = api.questions.generateMoreQuestions.useMutation();
 
-  // Prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -167,7 +168,7 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
                 size="md"
                 isBordered
                 as="button"
-                src={data?.user?.image || "https://placekitten.com/200/200"}
+                src={mock ? "https://i.pravatar.cc/150?img=9" : (data?.user?.image || "https://placekitten.com/200/200")}
                 className="transition-transform" />
             </DropdownTrigger>
             <DropdownMenu aria-label="User Actions" variant="flat">
@@ -223,8 +224,13 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession }: Sessio
                   </Tabs>
                 </div>
               </DropdownItem>
-              <DropdownItem key="settings">Upgrade</DropdownItem>
-              <DropdownItem key="logout" color="danger" onClick={() => signOut({ callbackUrl: "/" })}>
+              {/* <DropdownItem key="settings" onClick={() => {
+                router.push("/session/upgrade")
+              }}>Upgrade</DropdownItem> */}
+              <DropdownItem key="logout" color="danger" onClick={() => {
+                posthog.reset(true)
+                signOut({ callbackUrl: "/" })
+              }}>
                 Log Out
               </DropdownItem>
             </DropdownMenu>

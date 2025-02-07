@@ -2,6 +2,8 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { generateSessionContent, validateAnswerCorrect } from "../utils/openai";
 import { QuestionType } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
+import PostHogClient from "@/posthog";
 
 export const questionsRouter = createTRPCRouter({
   getSessionQuestions: protectedProcedure
@@ -21,6 +23,7 @@ export const questionsRouter = createTRPCRouter({
           content: true,
           type: true,
           options: true,
+          createdAt: true,
           answers: true,
           explanation: true,
           userAnswer: true,
@@ -35,6 +38,7 @@ export const questionsRouter = createTRPCRouter({
       const session = await ctx.db.studySession.findUnique({
         where: { id: input.sessionId },
         select: {
+          title: true,
           refinePrompt: true
         }
       })
@@ -44,6 +48,7 @@ export const questionsRouter = createTRPCRouter({
         hasDiscussion: question.discussion.length > 0
       }));
       return {
+        title: session?.title,
         refinePrompt: session?.refinePrompt,
         questions: formattedQuestions
       }
@@ -114,6 +119,18 @@ export const questionsRouter = createTRPCRouter({
       refinePrompt: z.string().optional()
     }))
     .mutation(async ({ ctx, input }) => {
+      const posthog = PostHogClient()
+      posthog.capture({
+        event: "generate more questions",
+        distinctId: ctx.session?.user?.id,
+        properties: {
+          sessionId: input.sessionId,
+          referenceQuestionId: input.referenceQuestionId,
+          refinePrompt: input.refinePrompt,
+        }
+      });
+      await posthog.shutdown();
+
       // Get the session to access the topic
       const session = await ctx.db.studySession.findUnique({
         where: { id: input.sessionId },
@@ -126,7 +143,10 @@ export const questionsRouter = createTRPCRouter({
         }
       });
       if (!session)
-        throw new Error("Session not found");
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Session not found"
+        });
 
       let question = null;
       if (input.referenceQuestionId) {
@@ -139,7 +159,6 @@ export const questionsRouter = createTRPCRouter({
         })
       }
 
-
       let refinePrompt: string | null = session.refinePrompt ?? null;
       if (input.refinePrompt) {
         refinePrompt = (session.refinePrompt
@@ -149,12 +168,14 @@ export const questionsRouter = createTRPCRouter({
           `The user wants more questions like this:\n\n${question.content} (${question.type})`
       }
 
-
       // Generate new questions using AI with existing questions as context
       const content = await generateSessionContent(session.topic, session.questions, 3, refinePrompt ?? undefined);
 
       if (!content?.questions.length)
-        throw new Error("Failed to generate new questions");
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Failed to generate new questions"
+        });
 
       let data: any = {
         refinePrompt: refinePrompt ?? undefined,

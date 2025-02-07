@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 import { generateSessionContent } from "../utils/openai";
 import { TRPCError } from "@trpc/server";
+import PostHogClient from "@/posthog";
 
 export const sessionRouter = createTRPCRouter({
   getHistory: protectedProcedure
@@ -56,9 +57,20 @@ export const sessionRouter = createTRPCRouter({
           },
         });
 
+        const posthog = PostHogClient()
+        posthog.capture({
+          distinctId: ctx.session?.user?.id,
+          event: "session created",
+          properties: {
+            sessionId: session.id,
+            topic: session.topic,
+            title: session.title,
+          }
+        })
+        await posthog.shutdown();
+        
         return session;
       } catch (error) {
-        console.log(error)
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Failed to create study session',

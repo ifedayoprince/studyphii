@@ -49,7 +49,6 @@ export const Session = () => {
         const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
         const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
-        // Show button when user has scrolled past 80% of content
         setShowGenerateMore(scrollPercentage > 0.8);
     };
 
@@ -63,7 +62,7 @@ export const Session = () => {
     useEffect(() => {
         if (!output) return;
 
-        console.log(output)
+        document.title = (output.title ?? "Session") + " | StudyPhii";
         if (output.refinePrompt) {
             setRefinePrompt(output.refinePrompt);
         }
@@ -92,7 +91,7 @@ export const Session = () => {
                         <QuestionSkeleton key={i} />
                     ))
                 ) : (
-                    output?.questions?.map((question, idx) => (
+                    output?.questions?.sort((a, b) => a.createdAt?.getTime() - b.createdAt?.getTime()).map((question, idx) => (
                         <motion.div
                             key={question.id}
                             variants={questionVariants}

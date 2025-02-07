@@ -2,18 +2,21 @@
 
 import { Textarea, Button } from "@nextui-org/react";
 import { ArrowUpIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/trpc/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { toast } from "@/hooks/use-toast";
+import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 
 
 export function NewSession() {
     const [input, setInput] = useState("");
     const router = useRouter();
+    const { data: session } = useSession();
     const isOnline = useOnlineStatus();
-
+    const path = useSearchParams();
     const utils = api.useUtils();
     const { mutate: createSession, isPending } = api.session.create.useMutation({
         onSuccess: async (session) => {
@@ -37,6 +40,18 @@ export function NewSession() {
         },
     });
 
+    useEffect(() => {
+        // console.log(path, path.get("login"))
+        if (path.get("login")) {
+            posthog.identify(session?.user.id, {}, {
+                email: session?.user.email,
+                name: session?.user.name,
+                referrer: session?.user.referrer
+            });
+            posthog.capture("user logged in");
+            router.replace("/session")
+        }
+    }, [path])
     const handleSubmit = () => {
         if (!isOnline) {
             toast({
@@ -69,6 +84,7 @@ export function NewSession() {
                     maxRows={5}
                     height={"100%"}
                     variant="bordered"
+                    className="text-[0.925rem]"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask StudyPhii a question..."

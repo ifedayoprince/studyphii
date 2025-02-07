@@ -51,12 +51,47 @@ const QuestionHead: React.FC<QuestionContentProps & { isValidating: boolean }> =
       document.body.removeChild(span);
     }, []);
 
+    // Helper function to split text while preserving KaTeX
+    const splitPreservingKaTeX = (text: string) => {
+      const parts: string[] = [];
+      let currentPart = '';
+      let inKaTeX = false;
+
+      const words = text.split(/\s+/);
+
+      words.forEach((word) => {
+        if (word.startsWith('$')) {
+          if (currentPart) {
+            parts.push(currentPart);
+            currentPart = '';
+          }
+          inKaTeX = true;
+          currentPart = word;
+        } else if (word.endsWith('$')) {
+          inKaTeX = false;
+          currentPart += (currentPart ? ' ' : '') + word;
+          parts.push(currentPart);
+          currentPart = '';
+        } else if (inKaTeX) {
+          currentPart += ' ' + word;
+        } else {
+          parts.push(word);
+        }
+      });
+
+      if (currentPart) {
+        parts.push(currentPart);
+      }
+
+      return parts;
+    };
+
     return (
-      <div className="prose prose-sm dark:prose-invert max-w-none text-xl items-baseline flex flex-wrap gap-2">
+      <div className="prose prose-sm dark:prose-invert max-w-none text-lg md:text-xl flex flex-wrap items-baseline">
         {segments.map((segment, idx) => {
           if (regex.test(segment)) {
-            return (
-              <div key={`slot-${id}-${idx}`} className="flex items-center">
+            return (<>
+              <div key={`slot-${id}-${idx}`} className="inline-flex items-center">
                 <input
                   ref={(el) => {
                     if (el && userAnswer) {
@@ -64,10 +99,11 @@ const QuestionHead: React.FC<QuestionContentProps & { isValidating: boolean }> =
                     }
                   }}
                   className={`bg-transparent text-xl py-0 !outline-none border-b-3 min-w-[7rem] w-[var(--input-width,7rem)] my-1 ${isCorrect === 1
-                    ? "border-success-600 text-success-600 dark:border-success-400 dark:text-success-400"
-                    : isCorrect === 2
-                      ? "border-danger-600 text-danger-600 dark:border-danger-400 dark:text-danger-400"
-                      : "border-gray-600 text-gray-500 dark:border-gray-700 dark:text-gray-400"}`}
+                      ? "border-success-600 text-success-600 dark:border-success-400 dark:text-success-400"
+                      : isCorrect === 2
+                        ? "border-danger-600 text-danger-600 dark:border-danger-400 dark:text-danger-400"
+                        : "border-gray-600 text-gray-500 dark:border-gray-700 dark:text-gray-400"
+                    }`}
                   placeholder=""
                   type="text"
                   value={userAnswer}
@@ -78,24 +114,26 @@ const QuestionHead: React.FC<QuestionContentProps & { isValidating: boolean }> =
                   }}
                 />
                 {isValidating && <Spinner size="sm" />}
-              </div>
+              </div>&nbsp;</>
             );
           }
 
-          return (
-            <ReactMarkdown
-              key={`text-${id}-${idx}`}
+          const parts = splitPreservingKaTeX(segment);
+
+          return parts.map((part, partIdx) => (
+            <><ReactMarkdown
+              key={`text-${id}-${idx}-${partIdx}`}
               remarkPlugins={[remarkMath, remarkGfm]}
               rehypePlugins={[rehypeKatex, rehypeRaw]}
               components={{
                 p: ({ children }) => (
-                  <span className="break-words whitespace-normal inline-block">{children}</span>
+                  <span className="inline-block whitespace-normal">{children}</span>
                 ),
               }}
             >
-              {segment}
-            </ReactMarkdown>
-          );
+              {part}
+            </ReactMarkdown>&nbsp;</>
+          ));
         })}
       </div>
     );
@@ -204,6 +242,8 @@ export const Question: React.FC<Partial<IQuestion> & {
   hasDiscussion: boolean
 }> = (props) => {
   const [openDiscussModal, setOpenDiscussModal] = useState(false);
+
+  /** 0 - not answered, 1 - correct, 2 - incorrect */
   const [isCorrect, setIsCorrect] = useState(props.isCorrect == null ? 0 : props.isCorrect == true ? 1 : 2);
   const [userAnswer, setUserAnswer] = useState(props.userAnswer);
   const [isValidating, setIsValidating] = useState(false);
@@ -228,7 +268,6 @@ export const Question: React.FC<Partial<IQuestion> & {
       setIsValidating(false);
     },
   });
-
 
   const updateAnswerMutation = api.questions.updateQuestionAnswer.useMutation();
   const moreQuestionsMutation = api.questions.generateMoreQuestions.useMutation();
@@ -380,7 +419,9 @@ export const Question: React.FC<Partial<IQuestion> & {
         break;
     }
 
-    handleAnswerChange(answer);
+    if (isCorrect != 1)
+      handleAnswerChange(answer);
+
     setShowExplanation(true);
   };
 
@@ -478,7 +519,7 @@ export const Question: React.FC<Partial<IQuestion> & {
               <Additem size={20} />
             </Button>
           </Tooltip>}
-          <Tooltip content="Reveal the answer to this question">
+          <Tooltip content="Reveal the answer/explanation to this question">
             <Button
               isIconOnly={true}
               variant="light"

@@ -48,3 +48,7 @@ yarn-error.log*
 .idea
 cursorful-video-raw.mp4
 studyphii video attempts/
+
+public/sw.js
+public/swe-*.js
+public/workbox-*.js

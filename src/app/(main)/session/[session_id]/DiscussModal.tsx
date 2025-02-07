@@ -35,7 +35,7 @@ const MessageBubble = forwardRef<HTMLDivElement, MessageBubbleProps>(({ message,
           }`}
       >
         <ReactMarkdown
-          className="prose prose-sm dark:prose-invert max-w-none"
+          className="prose prose-sm dark:prose-invert max-w-none text-[0.925rem] leading-[1.8]"
           remarkPlugins={[remarkMath, remarkGfm]}
           rehypePlugins={[rehypeKatex, rehypeRaw]}
         >
@@ -163,7 +163,6 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
           try {
             for await (const val of data) {
               if(abortStream){
-                console.log("breaking")
                 scrollToBottom();
                 break;
               }
@@ -172,6 +171,7 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
                 setStreamingText(prev => prev + val);
               else if (typeof val === "object") {
                 // Clear streaming text and add final message
+                console.log(streamingText)
                 addMessage(questionId, val);
                 setStreamingText(null);
                 setHasStarted(questionId, true);
@@ -230,7 +230,7 @@ export default function DiscussModal({ isOpen, onClose, questionId, hasHistory }
               <div className="flex flex-col gap-3 overflow-y-auto px-6 pt-6 pb-4 scrollbar-hide h-[calc(80vh-5rem)]">
                 {isLoading ? (
                   <div className="flex items-center justify-center h-full">
-                    <Spinner label="Loading chat history..." color="primary" />
+                    <Spinner label="Loading messages..." color="primary" />
                   </div>
                 ) : (
                   <AnimatePresence mode="popLayout">
