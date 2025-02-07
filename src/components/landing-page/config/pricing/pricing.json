@@ -1,0 +1,88 @@
+{
+        "sectionId": "pricing",
+        "backgroundColor": "bg-base-200",
+        "header": {
+          "title": "Pricing",
+          "titleClass": "font-medium text-primary mb-8",
+          "heading": "Bypass complex boilerplates, create, validate and launch quickly!",
+          "headingClass": "font-bold text-3xl lg:text-5xl tracking-tight mb-8 max-w-2xl mx-auto",
+          "offer": {
+            "text": "$100 off for the first 4440 customers",
+            "textClass": "text-sm md:text-base flex justify-center items-center gap-2",
+            "highlighted_text": "$100 off"
+          }
+        },
+        "plans": [
+          {
+            "name": "Yearly",
+            "originalPrice": "$59",
+            "discountedPrice": "$39",
+            "currency": "USD",
+            "popular": false,
+            "features": {
+                "feature1": {
+                  "text": "Everything you need to learn anything",
+                  "disabled": false,
+                  "highlighted_text": "anything",
+                  "overall_highlighted": false,
+                  "links": []
+                },
+                "feature2": {
+                  "text": "Life time updates",
+                  "disabled": false,
+                  "highlighted_text": "Everything",
+                  "overall_highlighted": true,
+                  "links": []
+                }
+              },
+            "buttonText": "START LEARNING"
+          },
+          {
+            "name": "Lifetime",
+            "originalPrice": "$160",
+            "discountedPrice": "$129",
+            "currency": "USD",
+            "popular": true,
+            "features": {
+                "feature1": {
+                  "text": "Everything you need to learn anything",
+                  "disabled": false,
+                  "highlighted_text": "anything",
+                  "overall_highlighted": false,
+                  "links": [],
+                  "tags": []
+                },
+                "feature2": {
+                  "text": "24/7 Support",
+                  "disabled": false,
+                  "highlighted_text": "20+ Latest",
+                  "overall_highlighted": false,
+                  "links": [
+                    {
+                      "text": "20+ Latest UI",
+                      "url": "https://example.com"
+                    }
+                  ],
+                  "tags": ["example", "feature"],
+                  "hover_text": "See the List of all the UI components"
+                }
+              },
+            "buttonText": "Get BuildFast",
+            "btnLink": "",
+            "buttonClass": "btn btn-primary group btn-block",
+            "note": "Pay once. Build unlimited projects!",
+            "noteClass": "flex items-center justify-center gap-2 text-sm text-center text-base-content/80 font-medium relative",
+            "badge": {
+              "text": "POPULAR",
+              "badgeClass": "badge text-xs text-primary-content font-semibold border-0 bg-primary"
+            }
+          }
+        ],
+        "testimonial": {
+          "text": "I was able to launch my project in just one day! I made 170$ already.",
+          "author": "Mateus De Nardo",
+          "badge": "Built a SaaS",
+          "badgeClass": "badge badge-accent badge-outline",
+          "containerClass": "space-y-4 mx-auto max-w-md mt-24"
+        }
+}

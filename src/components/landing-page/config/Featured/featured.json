@@ -1,0 +1,29 @@
+{
+    "title": "Featured on",
+    "logos": [
+      {
+        "src": "https://img.icons8.com/?size=100&id=32309&format=png&color=6b7280",
+        "alt": "Instagram",
+        "title": "Instagram",
+        "link": "https://instagram.com"
+      },
+      {
+        "src": "https://img.icons8.com/?size=100&id=118638&format=png&color=6b7280",
+        "alt": "TikTok",
+        "title": "TikTok",
+        "link": "https://tiktok.com"
+      },
+      {
+        "src": "https://img.icons8.com/?size=100&id=pxXrsP5hCqZw&format=png&color=6b7280",
+        "alt": "Reddit",
+        "title": "Reddit",
+        "link": "#"
+      },
+      {
+        "src": "https://img.icons8.com/?size=100&id=phOKFKYpe00C&format=png&color=6b7280",
+        "alt": "X",
+        "title": "X",
+        "link": "https://x.com"
+      }
+    ]
+  }

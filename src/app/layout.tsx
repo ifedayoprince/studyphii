@@ -1,20 +1,31 @@
+import 'swiper/css';
+import 'swiper/css/effect-cube';
+import 'swiper/css/effect-cards';
+import 'swiper/css/pagination';
+
 import "@/styles/globals.css";
+import "katex/dist/katex.min.css";
+
 
 import { GeistSans } from "geist/font/sans";
-import { TRPCReactProvider } from "@/trpc/react";
 import Script from "next/script";
-import { Toaster } from "@/components/ui/toaster"
+import { Providers } from "./providers";
+import { env } from "@/env";
+import { Metadata } from "next";
+import { Toaster } from "@/components/ui/toaster";
+import { InfluencerTracker } from "./influencer";
+import { getServerAuthSession } from "@/server/auth";
 
 
-export const metadata = {
-  title: 'StudyPhii — Study Guide Generator',
-  description: 'StudyPhii is a platform that builds a detailed study guide from your course outline. The guides are complete with YouTube videos, comprehension tests and study tips..',
-  icons: [{ rel: "icon", url: "./favicon.ico" }],
+export const metadata: Metadata = {
+  title: 'Get exam-ready in record time | StudyPhii',
+  description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
+  manifest: "./manifest.json",
   openGraph: {
     url: 'https://study.phii.space',
     type: 'website',
-    title: 'StudyPhii — Study Guide Generator',
-    description: 'StudyPhii is a platform that builds a detailed study guide from your course outline. The guides are complete with YouTube videos, comprehension tests and study tips.',
+    title: 'Get exam-ready in record time | StudyPhii',
+    description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
     images: [
       {
         url: './og.png',
@@ -26,10 +37,10 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    domain: 'study.phii.space',
-    url: 'https://study.phii.space',
-    title: 'StudyPhii — Study Guide Generator',
-    description: 'StudyPhii is a platform that builds a detailed study guide from your course outline. The guides are complete with YouTube videos, comprehension tests and study tips.',
+    creator: "Phii Space",
+    site: 'https://study.phii.space',
+    title: 'Get exam-ready in record time | StudyPhii',
+    description: 'StudyPhii is a platform that helps you ace every exam with less effort using specially crafted practice questions.',
     images: [
       {
         url: './og.png',
@@ -40,21 +51,24 @@ export const metadata = {
 };
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const session = await getServerAuthSession();
+
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
-      <body>
-        <TRPCReactProvider>
-          {children}
-        </TRPCReactProvider>
-        <Toaster />
-        <Script
+    <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
+        {env.NEXT_PUBLIC_ENV == "production" && <Script
           src="https://cloud.umami.is/script.js"
-          data-website-id="e5960873-de0f-4c97-ba94-6fd0c953524f"
-          strategy="lazyOnload" // or "afterInteractive" if you prefer
-        />
+          data-website-id="c7b9b62d-9fad-4050-93b4-10037352ea1e"
+          defer
+          />}
+      <body>
+        <Providers>
+          {children}
+          <InfluencerTracker session={session} />
+        </Providers>
+        <Toaster />
       </body>
     </html>
   );

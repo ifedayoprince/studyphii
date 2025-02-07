@@ -1,0 +1,17 @@
+{
+        "heading": "Frequently Asked Questions",
+        "questions": [
+          {
+            "question": "Does this work?",
+            "answer": "'The Testing Effect' demonstrates that learning through self-testing is significantly more effective than passive reading. StudyPhii was designed to help students leverage this principle by offering AI-generated practice questions tailored to the topics they wish to learn."
+          },
+          {
+            "question": "Is there a free trial?",
+            "answer": "Unfortunately, there is no free trial available. Running AI services is quite expensive, but we've worked hard to keep our pricing affordable. For instance, while ChatGPT charges $20 per month, StudyPhii is available for under $4 per month, and it’s even cheaper with a lifetime plan."
+          },
+          {
+            "question": "How do I get started?",
+            "answer": "1. Login with your Google Account. 2. Pick a plan. 3. Start learning."
+          }
+        ]
+      }

@@ -1,13 +1,23 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import GoogleProvider from 'next-auth/providers/google'
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-
 import { env } from "@/env";
 import { db } from "@/server/db";
+import { PaymentType } from "@prisma/client";
+
+
+interface Plan {
+  type: PaymentType;
+  status: string;
+  trialStartedAt: Date | null;
+  renewsAt: Date | null;
+  hasTakenTrial: boolean;
+}
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -19,15 +29,10 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      plan: Plan | null;
+      referrer: string | null;
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -37,25 +42,63 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: async ({ session, user }) => {
+      const userEntity = await db.user.findUnique({
+        where: {
+          id: user.id
+        },
+        include: {
+          plan: true,
+          payments: {
+            where: {
+              type: PaymentType.TRIAL
+            }
+          }
+        }
+      });
+
+      let plan: Plan | null = null;
+      if (!userEntity?.plan) {
+        plan = null;
+      } else {
+        plan = {
+          type: userEntity?.plan.type,
+          status: userEntity?.plan.status,
+          trialStartedAt: userEntity?.plan.type == "TRIAL" ? userEntity?.plan.startedAt : null,
+          renewsAt: userEntity?.plan.renewsAt,
+          hasTakenTrial: userEntity?.payments.length > 0
+        }
+      }
+
+      const result = {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          referrer: userEntity?.referrer,
+          plan
+        },
+      };
+
+      return result;
+    },
+    signIn() {
+      // const TESTERS = ["ifedayoprince@gmail.com", "studywithsturdyworks@gmail.com", "reachstudma@gmail.com"];
+      // if (!TESTERS.includes(user.email ?? "")) {
+      //   return '/beta';
+      // }
+      return true;
+    },
+  },
+  pages: {
+    signIn: "/auth"
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
+    GoogleProvider({
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET
+    })
   ],
 };
 

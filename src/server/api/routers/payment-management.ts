@@ -1,80 +1,151 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion  */
 import { z } from "zod";
-
 import {
-    createTRPCRouter,
-    publicProcedure,
+  createTRPCRouter,
+  publicProcedure,
 } from "@/server/api/trpc";
-import {
-    createCheckout,
-    lemonSqueezySetup,
-} from "@lemonsqueezy/lemonsqueezy.js";
 import { env } from "@/env";
-import { db } from "@/server/db";
+import { TRPCError } from "@trpc/server";
 
-
-const setupLemonSqueezy = () => {
-    lemonSqueezySetup({
-        apiKey: env.LEMON_SQUEEZY_API_KEY,
-        onError(error) {
-            console.log(error);
-        },
-    });
-};
-
-const STUDYSPACE_VARIANT_ID = 545976;
 
 export const paymentManagementRouter = createTRPCRouter({
-    createCheckoutForVariant: publicProcedure
-        .input(
-            z.object({
-                guideId: z.string(),
+  createCheckout: publicProcedure
+    .input(z.object({
+      userId: z.string(),
+      plan: z.enum(["trial", "yearly", "lifetime"]),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const ipAddress = ctx.headers.get('x-forwarded-for') ?? ""; 
+
+      let billingInfo = {} as any;
+      try {
+        const response = await fetch(`https://freeipapi.com/api/json/${ipAddress}`);
+        console.log(ipAddress, await response.text())
+        billingInfo = JSON.parse(await response.text());
+      } catch (error) { }
+
+      const billingData = {
+        city: billingInfo?.cityName || "San Francisco",
+        country: billingInfo?.countryCode || "US",
+        state: billingInfo?.regionName || "CA",
+        street: "123 Market Street",
+        zipcode: billingInfo?.zipCode || "94103"
+      };
+
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: input.userId
+        },
+        select: {
+          email: true,
+          id: true,
+          payments: {
+            where: {
+              type: "TRIAL"
+            }
+          }
+        }
+      });
+
+      const hasTakenTrial = (user?.payments ?? []).length > 0 || false;
+      if (hasTakenTrial && input.plan == "trial") {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User has already taken a trial"
+        });
+      }
+
+      try {
+        let link = "";
+        const host = env.NODE_ENV == "production" ? "https://live.dodopayments.com" : "https://test.dodopayments.com";
+        
+        if (input.plan === "yearly") {
+          const response = await fetch(`${host}/subscriptions`, {
+            method: "POST",
+            body: JSON.stringify({
+              billing: billingData,
+              customer: {
+                email: ctx.session?.user.email,
+                name: ctx.session?.user.name
+              },
+              metadata: { userId: ctx.session?.user.id },
+              product_id: "pdt_sOOK8fNIzvzRc116OScUj",
+              quantity: 1,
+              payment_link: true,
+              return_url: `${env.HOSTED_URL}/congratulations`
             }),
-        )
-        .mutation(async ({ input }) => {
-            setupLemonSqueezy();
-
-            if (!env.LEMON_SQUEEZY_STORE_ID) {
-                throw new Error(
-                    "Missing required LEMON_SQUEEZY_STORE_ID env variable. Please, set it in your .env file.",
-                );
+            headers: {
+              "Authorization": `Bearer ${env.DODOPAYMENTS_API_KEY}`,
+              "Content-Type": "application/json"
             }
+          });
 
-            try {
-                const checkout = await createCheckout(
-                    env.LEMON_SQUEEZY_STORE_ID,
-                    STUDYSPACE_VARIANT_ID,
-                    {
-                        checkoutData: {
-                            custom: {
-                                studyGuideId: input.guideId,
-                            },
-                        },
-                        productOptions: {
-                            redirectUrl: `${env.HOSTED_URL}`,
-                            receiptLinkUrl: `${env.HOSTED_URL}/download/${input.guideId}`,
-                        },
-                        checkoutOptions: {
-                            embed: true,
-                            media: false,
-                            logo: false,
-                            desc: false,
-                        },
-                    },
-                );
-                console.log(checkout)
-                return checkout;
-            } catch (e) {
-                console.log(e)
+          const data = await response.json();
+          link = data.payment_link;
+        } else if (input.plan === "lifetime") {
+          const response = await fetch(`${host}/payments`, {
+            method: "POST",
+            body: JSON.stringify({
+              billing: billingData,
+              customer: {
+                email: ctx.session?.user.email,
+                name: ctx.session?.user.name
+              },
+              metadata: { userId: ctx.session?.user.id },
+              return_url: `${env.HOSTED_URL}/congratulations`,
+              product_cart: [
+                {
+                  product_id: "pdt_ZGYAD8yfzFxOv8iFFgDUG",
+                  quantity: 1
+                }
+              ],
+              payment_link: true
+            }),
+            headers: {
+              "Authorization": `Bearer ${env.DODOPAYMENTS_API_KEY}`,
+              "Content-Type": "application/json"
             }
-        }),
-    getGuidePurchase: publicProcedure.query(async ({ ctx }) => {
-        // const oneTimePurchases = await db.lemonSqueezyOneTimePayment.findMany({
-        //   where: {
-        //     userId: ctx.session.user.id,
-        //   },
-        // });
+          });
 
-        // return oneTimePurchases;
+          const data = await response.json();
+          link = data.payment_link;
+        } else if (input.plan === "trial") {
+          const response = await fetch(`${host}/payments`, {
+            method: "POST",
+            body: JSON.stringify({
+              billing: billingData,
+              customer: {
+                email: ctx.session?.user.email,
+                name: ctx.session?.user.name
+              },
+              metadata: { userId: ctx.session?.user.id },
+              return_url: `${env.HOSTED_URL}/congratulations`,
+              product_cart: [
+                {
+                  product_id: "pdt_5mchpws2rFiGNBHTlR113",
+                  quantity: 1
+                }
+              ],
+              payment_link: true
+            }),
+            headers: {
+              "Authorization": `Bearer ${env.DODOPAYMENTS_API_KEY}`,
+              "Content-Type": "application/json"
+            }
+          });
+
+          const data = JSON.parse(await response.text());
+          link = data.payment_link;
+        }
+
+        return {
+          link
+        }
+      } catch (e) {
+        console.log(e)
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Could not create payment link"
+        });
+      }
     })
 });

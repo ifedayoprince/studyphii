@@ -1,0 +1,19 @@
+{
+      "sections": [
+        {
+          "title": "LINKS",
+          "links": [
+            { "text": "Pricing", "href": "#pricing" },
+            { "text": "FAQ", "href": "#faq" },
+            { "text": "Instagram", "href": "https://www.instagram.com/studyphii_" }
+          ]
+        },
+        {
+          "title": "LEGAL",
+          "links": [
+            { "text": "Terms of service", "href": "/tos" },
+            { "text": "Privacy policy", "href": "/privacy" }
+          ]
+        }
+      ]
+    }

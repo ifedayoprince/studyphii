@@ -1,7 +1,9 @@
-import { studyGuideRouter } from "@/server/api/routers/studyGuide";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
-import { pdfRouter } from "@/server/api/routers/pdf";
 import { paymentManagementRouter } from "./routers/payment-management";
+import { sessionRouter } from "@/server/api/routers/session";
+import { questionsRouter } from "@/server/api/routers/questions";
+import { messagesRouter } from "./routers/messages";
+import { usersRouter } from "./routers/user";
 
 /**
  * This is the primary router for your server.
@@ -9,9 +11,11 @@ import { paymentManagementRouter } from "./routers/payment-management";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  studyGuide: studyGuideRouter,
   paymentManagement: paymentManagementRouter,
-  pdf: pdfRouter,
+  session: sessionRouter,
+  questions: questionsRouter,
+  messages: messagesRouter,
+  users: usersRouter
 });
 
 // export type definition of API

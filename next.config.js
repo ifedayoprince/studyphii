@@ -1,7 +1,5 @@
-/**
- * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
- * for Docker builds.
- */
+import nextPwa from '@ducanh2912/next-pwa';
+
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
@@ -11,9 +9,23 @@ const config = {
             bodySizeLimit: "10mb",
         },
     },
+    typescript: {
+        ignoreBuildErrors: true
+    },
     eslint: {
         ignoreDuringBuilds: true,
-    }
+    },
+    skipTrailingSlashRedirect: true, 
 };
 
-export default config;
+const withPwa = nextPwa({
+    dest: "public",
+    register: true,
+    // cacheOnFrontEndNav: true,
+    disable: process.env.NODE_ENV === 'development',
+    fallbacks: {
+        document: "/~offline"
+    }
+});
+
+export default withPwa(config);

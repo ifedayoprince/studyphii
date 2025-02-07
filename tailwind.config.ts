@@ -1,9 +1,14 @@
 import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
+import { nextui } from "@nextui-org/react";
+
 
 export default {
 	darkMode: ["class"],
-	content: ["./src/**/*.tsx"],
+	content: [
+		"./src/**/*.tsx",
+		"./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}"
+	],
 	theme: {
 		extend: {
 			fontFamily: {
@@ -54,7 +59,10 @@ export default {
 					'3': 'hsl(var(--chart-3))',
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))'
-				}
+				},
+				color1: "#312e81",
+				color2: "#581c87",
+				color3: "#831843",
 			},
 			keyframes: {
 				'accordion-down': {
@@ -72,13 +80,24 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'gradient-xy': {
+					'0%, 100%': {
+						'background-size': '400% 400%',
+						'background-position': 'left center'
+					},
+					'50%': {
+						'background-size': '200% 200%',
+						'background-position': 'right center'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'gradient-xy': 'gradient-xy 6s ease infinite'
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("tailwindcss-animate"), nextui(), require('@tailwindcss/typography')],
 } satisfies Config;

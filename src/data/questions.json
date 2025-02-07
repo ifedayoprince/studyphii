@@ -1,0 +1,49 @@
+[
+    {
+        "question": "Which of the following best describes a static position in human movement?",
+        "type": "multiple-choice",
+        "options": [
+            {
+                "value": "A position where the body is actively engaged in movement",
+                "key": "a"
+            },
+            {
+                "value": "A state of equilibrium with no motion occurring",
+                "key": "b",
+                "isCorrect": true
+            },
+            {
+                "value": "A dynamic posture involving multiple joint movements",
+                "key": "c"
+            },
+            {
+                "value": "A transitional phase between different movement",
+                "key": "d"
+            }
+        ]
+    },
+    {
+        "question": "There are {{slot}} countries in the world",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Calculate the quantity of atoms here",
+        "type": "subjective"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    },
+    {
+        "question": "Oppenheimer's first name is {{slot}}",
+        "type": "fill-in-the-blanks"
+    }
+]
