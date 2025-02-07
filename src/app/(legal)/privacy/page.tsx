@@ -140,7 +140,7 @@ export default function PrivacyPolicy() {
 
                             <h3 className="font-semibold">6.2 Data Deletion</h3>
                             <p>
-                                You can request the deletion of your account and associated data by contacting us at <a href="mailto:support@studyphii.com" className="text-blue-500">support@studyphii.com</a>.
+                                You can request the deletion of your account and associated data by contacting us at <a href="mailto:hello@phii.space" className="text-blue-500">hello@phii.space</a>.
                             </p>
 
                             <h3 className="font-semibold">6.3 Marketing Preferences</h3>
@@ -174,7 +174,7 @@ export default function PrivacyPolicy() {
                     <section className="mb-6">
                         <h2 className="text-2xl font-semibold mb-4">10. Contact Us</h2>
                         <p>
-                            If you have questions or concerns about this Privacy Policy, please contact us at: <a href="mailto:dev@phii.space" className="text-blue-500">dev@phii.space</a>
+                            If you have questions or concerns about this Privacy Policy, please contact us at: <a href="mailto:hello@phii.space" className="text-blue-500">hello@phii.space</a>
                         </p>
                     </section>
                 </div>

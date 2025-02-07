@@ -117,7 +117,7 @@ export default function TermsOfService() {
                 <section className="mb-6">
                     <h2 className="text-2xl font-semibold mb-4">12. Contact Us</h2>
                     <p>
-                        For questions or concerns about these Terms, please contact us at: <a href="mailto:dev@phii.space" className="text-blue-500 underline">dev@phii.space</a>.
+                        For questions or concerns about these Terms, please contact us at: <a href="mailto:hello@phii.space" className="text-blue-500 underline">hello@phii.space</a>.
                     </p>
                 </section>
             </div>
