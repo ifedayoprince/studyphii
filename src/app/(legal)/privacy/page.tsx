@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
                 <Button variant="light" className="max-w-fit" onClick={() => router.back()}>← back</Button>
                 <div className="px-6 py-8 max-w-4xl mx-auto">
                     <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
-                    <p className="text-sm text-gray-600 mb-6">Last Updated: 29th December 2024</p>
+                    <p className="text-sm text-gray-600 mb-6">Last Updated: 7th February 2025</p>
 
                     <p className="mb-4">
                         Your privacy is important to us. This Privacy Policy explains how StudyPhii collects, uses, and protects your information when you use our platform and services.

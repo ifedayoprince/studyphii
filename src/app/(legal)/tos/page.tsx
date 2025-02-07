@@ -10,7 +10,7 @@ export default function TermsOfService() {
             <Button variant="light" className="max-w-fit" onClick={() => router.back()}>← back</Button>
             <div className="px-6 py-8 max-w-4xl mx-auto">
                 <h1 className="text-3xl font-bold mb-6">Terms and Conditions</h1>
-                <p className="text-sm text-gray-600 mb-6">Last Updated: 29th December 2024</p>
+                <p className="text-sm text-gray-600 mb-6">Last Updated: 7th February 2025</p>
 
                 <p className="mb-4">
                     Welcome to StudyPhii! These Terms and Conditions ("Terms") govern your use of our platform and services. By accessing or using StudyPhii, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use StudyPhii.
