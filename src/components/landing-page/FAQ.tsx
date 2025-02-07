@@ -28,47 +28,45 @@ const FAQ: React.FC = () => {
         setExpanded(expanded === index ? null : index);
     };
 
-    
     return (
         <section className='bg-background-secondary pt-16 w-full space-y-10' id='faq'>
             <YoutubeVideo />
-        <div className='flex flex-col overflow-hidden align-middle items-center max-w-sm py-11 px-10 md:py-24 md:px-24 md:max-w-5xl mx-auto rounded-3xl border border-elements-secondary'>
-            <div className='flex flex-col text-center basis-1/2'>
-                <p className='sm:text-4xl text-3xl font-extrabold mb-8'>
-                    Frequently Asked Questions
-                </p>
-                <div className='font-normal'>
-                    Have another question? Contact me on <a href="https://x.com/ifedayoprince_">X (Twitter)</a> or by <a href="mailto:dev@phii.space">email</a>
+            <div className='flex flex-col overflow-hidden align-middle items-center max-w-sm py-11 px-10 md:py-24 md:px-24 md:max-w-5xl mx-auto rounded-3xl border border-elements-secondary'>
+                <div className='flex flex-col text-center basis-1/2'>
+                    <p className='sm:text-4xl text-3xl font-extrabold mb-8'>
+                        Frequently Asked Questions
+                    </p>
+                    <div className='font-normal'>
+                        Have another question? Contact me on <a href="https://x.com/ifedayoprince_" className="underline underline-offset-1">X (Twitter)</a> or by <a href="mailto:hello@phii.space" className="underline underline-offset-1">email</a>
+                    </div>
                 </div>
+                <div className='w-full'>
+                    <ul className='mt-9'>
+                        {questions.map((item, index) => (
+                            <li key={index} className='w-full'>
+                                <button
+                                    className='relative flex gap-2 justify-between items-center w-full py-5 px-4 text-base font-semibold text-left border-t border-t-elements-secondary md:text-lg'
+                                    onClick={() => toggleExpand(index)}>
+                                    {item.question}
+                                    {expanded === index ? <ArrowUp2 /> : <ArrowDown2 />}
+                                </button>
+                                {expanded === index && (
+                                    <motion.div
+                                        initial={{ height: 0 }}
+                                        animate={{ height: 'auto' }}
+                                        className='overflow-hidden'
+                                    >
+                                        <p className='py-2 px-4'>{item.answer}</p>
+                                    </motion.div>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
             </div>
-            <div className='w-full'>
-            <ul className='mt-9'>
-                {questions.map((item, index) => (
-                    <li key={index} className='w-full'>
-                        <button
-                            className='relative flex gap-2 justify-between items-center w-full py-5 px-4 text-base font-semibold text-left border-t border-t-elements-secondary md:text-lg'
-                            onClick={() => toggleExpand(index)}
-                        >
-                            {item.question}
-                            {expanded === index ? <ArrowUp2 /> : <ArrowDown2 />}
-                        </button>
-                        {expanded === index && (
-                            <motion.div
-                                initial={{ height: 0 }}
-                                animate={{ height: 'auto' }}
-                                className='overflow-hidden'
-                            >
-                                <p className='py-2 px-4'>{item.answer}</p>
-                            </motion.div>
-                        )}
-                    </li>
-                ))}
-            </ul>
-            </div>
-            
-        </div>
-    </section>
-);
+        </section>
+    );
 };
 
 export default FAQ;
