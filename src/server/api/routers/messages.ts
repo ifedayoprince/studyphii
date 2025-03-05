@@ -24,6 +24,11 @@ export const messagesRouter = createTRPCRouter({
       return await ctx.db.message.findMany({
         where: {
           questionId: input.questionId,
+          question: {
+            session: {
+              userId: ctx.session?.user.id
+            }
+          }
         },
         orderBy: {
           createdAt: "asc",
@@ -42,7 +47,12 @@ export const messagesRouter = createTRPCRouter({
           questionId: input.questionId,
           role: "studyphii",
           isAborted: false,
-          isComplete: false
+          isComplete: false,
+          question: {
+            session: {
+              userId: ctx.session?.user.id
+            }
+          }
         }
       })
       if (!message) return false;
@@ -63,7 +73,14 @@ export const messagesRouter = createTRPCRouter({
     .mutation(async function* ({ ctx, input }) {
       // Get previous messages for context
       const previousMessages = await ctx.db.message.findMany({
-        where: { questionId: input.questionId },
+        where: { 
+          questionId: input.questionId,
+          question: {
+            session: {
+              userId: ctx.session?.user.id
+            }
+          }
+        },
         orderBy: { createdAt: "desc" },
         take: 20,
       });
@@ -85,13 +102,16 @@ export const messagesRouter = createTRPCRouter({
       const question = await ctx.db.question.findUnique({
         where: {
           id: input.questionId,
+          session: {
+            userId: ctx.session?.user.id
+          }
         },
       });
 
       if (!question) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Question not found',
+          message: "We couldn't find this question. Please try again or start a new session.",
         });
       }
 
@@ -139,7 +159,7 @@ export const messagesRouter = createTRPCRouter({
         });
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Error generating response',
+          message: "We couldn't generate a response at this time. Please try again in a few moments.",
         });
       }
     }),

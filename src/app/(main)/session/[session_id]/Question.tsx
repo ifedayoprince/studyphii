@@ -34,7 +34,7 @@ const QuestionHead: React.FC<QuestionContentProps & { isValidating: boolean }> =
   if (!content) return null;
 
   if (type === "FILL_IN_BLANKS") {
-    const regex = /(\s\{\{\s*slot\s*\}\}|\s_{10})/gi;
+    const regex = /(\{\{\s*slot\s*\}\}|_{5,})/gi;
     const segments = content.split(regex);
 
     const calculateWidth = useCallback((value: string, inputElement: HTMLInputElement) => {

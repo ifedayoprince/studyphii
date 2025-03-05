@@ -73,7 +73,7 @@ export const sessionRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create study session',
+          message: 'Sorry, we couldn\'t create your study session right now. Please try again in a few moments.',
           cause: error,
         });
       }

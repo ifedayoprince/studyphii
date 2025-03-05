@@ -50,7 +50,7 @@ export const paymentManagementRouter = createTRPCRouter({
       if (hasTakenTrial && input.plan == "trial") {
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "The 72-hour trial can only be used once."
+          message: "You've already used your free trial. Please choose a paid plan to continue using our service."
         });
       }
 
@@ -144,7 +144,7 @@ export const paymentManagementRouter = createTRPCRouter({
         console.log(e)
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Could not create payment link."
+          message: "Sorry, we couldn't process your payment request at the moment. Please try again later or contact support if the issue persists."
         });
       }
     })

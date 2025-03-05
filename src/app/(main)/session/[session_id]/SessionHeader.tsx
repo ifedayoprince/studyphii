@@ -37,7 +37,20 @@ export const SessionHeader = ({ onOpenSidebar, openSidebar, newSession, mock }: 
   const sessionId = params.session_id as string;
   const [isGenerating, setIsGenerating] = useState(false);
   const { sessionQuestionsRefresher } = useGlobalStore();
-  const moreQuestionsMutation = api.questions.generateMoreQuestions.useMutation();
+  const moreQuestionsMutation = api.questions.generateMoreQuestions.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Questions refined!",
+        description: "New questions have been added based on the additional info you provided."
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error generating more questions",
+        description: error.message
+      });
+    }
+  });
 
   useEffect(() => {
     setMounted(true);

@@ -20,6 +20,10 @@ export function NewSession() {
     const utils = api.useUtils();
     const { mutate: createSession, isPending } = api.session.create.useMutation({
         onSuccess: async (session) => {
+            toast({
+                title: "Session created!",
+                description: "Your session has been created. You will be redirected shortly."
+            });
             await utils.session.getHistory.cancel();
 
             // Optimistically update the cache
@@ -38,6 +42,12 @@ export function NewSession() {
 
             router.push(`/session/${session.id}`);
         },
+        onError: (error) => {
+            toast({
+                title: "We couldn't start your session 😔",
+                description: error.message
+            });
+        }
     });
 
     useEffect(() => {

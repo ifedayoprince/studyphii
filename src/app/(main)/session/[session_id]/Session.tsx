@@ -1,13 +1,14 @@
 "use client"
 import { Question } from './Question';
 import { ScrollShadow, Button } from '@nextui-org/react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/trpc/react';
 import { QuestionType } from '@prisma/client';
 import { QuestionSkeleton } from './QuestionSkeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useRef, useEffect } from 'react';
 import { useGlobalStore } from './globalStore';
+import { toast } from '@/hooks/use-toast';
 
 const questionVariants = {
     hidden: {
@@ -27,9 +28,10 @@ const questionVariants = {
 
 export const Session = () => {
     const params = useParams();
+    const router = useRouter();
     const sessionId = params.session_id as string;
 
-    const { data: output, isLoading, refetch } = api.questions.getSessionQuestions.useQuery({ sessionId });
+    const { data: output, isLoading, refetch, error } = api.questions.getSessionQuestions.useQuery({ sessionId });
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [showGenerateMore, setShowGenerateMore] = useState(false);
@@ -67,7 +69,25 @@ export const Session = () => {
             setRefinePrompt(output.refinePrompt);
         }
         setSessionQuestionsRefresher(async () => { await refetch() });
-    }, [output])
+    }, [output]);
+    useEffect(() => {
+        if (error == null) return;
+
+        if (error.data?.code === "NOT_FOUND") {
+            toast({
+                title: "Session not found",
+                description: "The session you are trying to access does not exist."
+            });
+            router.push("/session");
+        } else {
+            toast({
+                title: "Error loading session",
+                description: error.message
+            });
+        }
+
+    }, [error]);
+
 
     const handleGenerateMore = async () => {
         setIsGenerating(true);

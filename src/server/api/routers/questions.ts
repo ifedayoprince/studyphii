@@ -11,6 +11,22 @@ export const questionsRouter = createTRPCRouter({
       sessionId: z.string(),
     }))
     .query(async ({ ctx, input }) => {
+      const session = await ctx.db.studySession.findUnique({
+        where: {
+          id: input.sessionId,
+          userId: ctx.session?.user.id
+        },
+        select: {
+          title: true,
+          refinePrompt: true
+        }
+      })
+      if (!session)
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "We couldn't find this study session. Please try again or create a new session."
+        });
+
       const questions = await ctx.db.question.findMany({
         where: {
           sessionId: input.sessionId,
@@ -35,13 +51,6 @@ export const questionsRouter = createTRPCRouter({
           }
         }
       });
-      const session = await ctx.db.studySession.findUnique({
-        where: { id: input.sessionId },
-        select: {
-          title: true,
-          refinePrompt: true
-        }
-      })
 
       const formattedQuestions = questions.map(question => ({
         ...question,
@@ -62,11 +71,19 @@ export const questionsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Get the question and its associated session
       const question = await ctx.db.question.findFirst({
-        where: { id: input.questionId }
+        where: { 
+          id: input.questionId,
+          session: {
+            userId: ctx.session?.user.id
+          }
+        }
       });
 
       if (!question || question.type == QuestionType.MULTIPLE_CHOICE) {
-        throw new Error("Question not found or is not supported.");
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "We couldn't find this question or it doesn't support this type of answer."
+        });
       }
 
       const isCorrect = await validateAnswerCorrect(input.answer, question.content);
@@ -93,12 +110,20 @@ export const questionsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Get the question to verify it's not subjective
       const question = await ctx.db.question.findUnique({
-        where: { id: input.questionId },
+        where: { 
+          id: input.questionId,
+          session: {
+            userId: ctx.session?.user.id
+          }
+        },
         select: { type: true }
       });
 
       if (!question || question.type === QuestionType.SUBJECTIVE) {
-        throw new Error("Question not found or is subjective type");
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "We couldn't find this question or it doesn't support this type of answer."
+        });
       }
 
       // Update the question with user's answer and result
@@ -133,7 +158,10 @@ export const questionsRouter = createTRPCRouter({
 
       // Get the session to access the topic
       const session = await ctx.db.studySession.findUnique({
-        where: { id: input.sessionId },
+        where: { 
+          id: input.sessionId,
+          userId: ctx.session?.user.id
+        },
         select: {
           topic: true,
           refinePrompt: true,
@@ -145,13 +173,18 @@ export const questionsRouter = createTRPCRouter({
       if (!session)
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "Session not found"
+          message: "We couldn't find this study session. Please try again or create a new session."
         });
 
       let question = null;
       if (input.referenceQuestionId) {
         question = await ctx.db.question.findUnique({
-          where: { id: input.referenceQuestionId },
+          where: { 
+            id: input.referenceQuestionId,
+            session: {
+              userId: ctx.session?.user.id
+            }
+          },
           select: {
             content: true,
             type: true
@@ -174,7 +207,7 @@ export const questionsRouter = createTRPCRouter({
       if (!content?.questions.length)
         throw new TRPCError({
           code: "BAD_REQUEST",
-          message: "Failed to generate new questions"
+          message: "We couldn't generate new questions at this time. Please try again or rephrase your topic."
         });
 
       let data: any = {
