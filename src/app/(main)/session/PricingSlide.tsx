@@ -2,7 +2,6 @@
 import { toast } from "@/hooks/use-toast";
 import { api } from "@/trpc/react";
 import { Button, Card } from "@nextui-org/react"
-import { TRPCClientErrorLike } from "@trpc/client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
